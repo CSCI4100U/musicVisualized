@@ -1,3 +1,4 @@
+import 'package:final_project/top_data/top_scrobbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'recent_tracks.dart';
@@ -15,7 +16,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: RecentTracksPage(),
+      home: TopScrobblesPage(),
+      //TopScrobblesPage()
     );
   }
 }

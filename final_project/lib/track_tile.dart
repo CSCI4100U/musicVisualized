@@ -30,7 +30,7 @@ class TrackListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scrobbledTime = _formatScrobbledTime(track['date']);
-
+    print( track);
     return Card(
       elevation: 2,
       margin: EdgeInsets.all(8),
