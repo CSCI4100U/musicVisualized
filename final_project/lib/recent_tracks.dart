@@ -1,3 +1,4 @@
+import 'package:final_project/top_data/top_scrobbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -80,6 +81,15 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Recent Tracks'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.swap_horiz),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage()),
+            ),
+          ),
+        ],
       ),
       body: ListView.builder(
         itemCount: _tracks.length,

@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:final_project/utils/fetch_image.dart';
 
+import '../recent_tracks.dart';
+
 class TopScrobblesPage extends StatefulWidget {
   @override
   _TopScrobblesPageState createState() => _TopScrobblesPageState();
@@ -92,7 +94,15 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Top Scrobbles'),
+        title: Text('Top Scrobbles'),actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.swap_horiz),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RecentTracksPage()),
+          ),
+        ),
+      ],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -108,7 +118,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         children: [
           _buildList(_topTracks),
           _buildList(_topAlbums),
-           _buildArtistList(_topArtists),
+          _buildArtistList(_topArtists),
         ],
       ),
     );
