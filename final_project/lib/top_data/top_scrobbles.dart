@@ -40,7 +40,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 
   Future<void> _fetchTopArtists() async {
     final String _apiKey = dotenv.get('API_KEY');
-    final String _user = "McGodFTW";
+    final String _user = dotenv.get('USER');
     final response = await http.get(
       Uri.parse(
           'https://ws.audioscrobbler.com/2.0/?method=user.getTopArtists&user=$_user&api_key=$_apiKey&format=json&limit=10'
@@ -57,7 +57,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 
   Future<void> _fetchTopAlbums() async {
     final String _apiKey = dotenv.get('API_KEY');
-    final String _user = "McGodFTW";
+    final String _user = dotenv.get('USER');
     final response = await http.get(
       Uri.parse(
           'https://ws.audioscrobbler.com/2.0/?method=user.getTopAlbums&user=$_user&api_key=$_apiKey&format=json&limit=10'
@@ -74,7 +74,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 
   Future<void> _fetchTopTracks() async {
     final String _apiKey = dotenv.get('API_KEY');
-    final String _user = "McGodFTW";
+    final String _user = dotenv.get('USER');
     final response = await http.get(
       Uri.parse(
           'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$_user&api_key=$_apiKey&format=json&limit=10'

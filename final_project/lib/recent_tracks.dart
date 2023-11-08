@@ -13,7 +13,7 @@ class RecentTracksPage extends StatefulWidget {
 
 class _RecentTracksPageState extends State<RecentTracksPage> {
   final String _apiKey = dotenv.get('API_KEY');
-  final String _user = 'TejS40';
+  final String _user = dotenv.get('USER');
   List<dynamic> _tracks = [];
   bool _isLoading = true;
   String? _error;
