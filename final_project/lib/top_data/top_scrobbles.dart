@@ -51,7 +51,11 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       setState(() {
         _topArtists = data['topartists']['artist'];
       });
+
+      print(data);
     }
+
+
 
   }
 
