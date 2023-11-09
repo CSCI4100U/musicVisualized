@@ -2,6 +2,33 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+Future<String> fetchTrackImageUrl(String artist, String track) async {
+  await dotenv.load();
+  final accessToken = await getSpotifyAccessToken();
+
+  final artistQueryParam = Uri.encodeQueryComponent(artist);
+  final trackQueryParam = Uri.encodeQueryComponent(track);
+
+  final searchUrl = Uri.parse(
+      'https://api.spotify.com/v1/search?q=track:"$trackQueryParam" artist:"$artistQueryParam"&type=track&limit=1'
+  );
+
+  final response = await http.get(searchUrl, headers: {
+    'Authorization': 'Bearer $accessToken',
+  });
+
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    if (data['tracks']['items'].isNotEmpty) {
+      final trackImageUrl = data['tracks']['items'][0]['album']['images'][0]['url'];
+      return trackImageUrl;
+    }
+  }
+
+  // Handle error or return a default image URL
+  return 'default_image_url';
+}
+
 Future<String> fetchAlbumImageUrl(String artist, String album) async {
   await dotenv.load();
   final apiKey = dotenv.get('SPOTIFY_API_KEY');
@@ -17,9 +44,6 @@ Future<String> fetchAlbumImageUrl(String artist, String album) async {
   final response = await http.get(searchUrl, headers: {
     'Authorization': 'Bearer $accessToken',
   });
-  if (artist == album) {
-    return fetchArtistImageUrl(artist);
-  }
   if (response.statusCode == 200) {
     final data = json.decode(response.body);
     if (data['albums']['items'].isNotEmpty) {
@@ -28,8 +52,6 @@ Future<String> fetchAlbumImageUrl(String artist, String album) async {
       return albumImageUrl;
     }
   }
-
-  // If the artist and album match, return the artist's picture
 
 
   // Handle error or return a default image URL

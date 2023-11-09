@@ -136,51 +136,102 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         String artistName = item['artist']['name'] ?? 'Unknown Artist';
         String trackName = item['name'] ?? 'Unknown Track';
         String playCount = item['playcount']?.toString() ?? '0';
+        if (items == _topAlbums){
+          return FutureBuilder(
 
-        return FutureBuilder(
-          future: fetchAlbumImageUrl(artistName, trackName),
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            }  else {
-              String imageUrl = snapshot.data ?? 'http://mcgodftw.dev/i/r2kyqb6k.png'; // Fallback URL in case of error
-              return Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                elevation: 5,
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                child: ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  leading: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      imageUrl,
-                      width: 50,
-                      height: 50,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(Icons.broken_image);
+            future: fetchAlbumImageUrl(artistName, trackName),
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              }  else {
+                String imageUrl = snapshot.data ?? 'http://mcgodftw.dev/i/r2kyqb6k.png'; // Fallback URL in case of error
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        imageUrl,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.broken_image);
+                        },
+                      ),
+                    ),
+                    title: Text(
+                      trackName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text('Artist: $artistName\nPlay count: $playCount'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.more_vert),
+                      onPressed: () {
                       },
                     ),
                   ),
-                  title: Text(
-                    trackName,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
+                );
+              }
+            },
+          );
+        }
+        else {
+          return FutureBuilder(
+
+            future: fetchTrackImageUrl(artistName, trackName),
+            builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else {
+                String imageUrl = snapshot.data ??
+                    'http://mcgodftw.dev/i/r2kyqb6k.png'; // Fallback URL in case of error
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        imageUrl,
+                        width: 50,
+                        height: 50,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(Icons.broken_image);
+                        },
+                      ),
+                    ),
+                    title: Text(
+                      trackName,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                        'Artist: $artistName\nPlay count: $playCount'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.more_vert),
+                      onPressed: () {},
                     ),
                   ),
-                  subtitle: Text('Artist: $artistName\nPlay count: $playCount'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: () {
-                    },
-                  ),
-                ),
-              );
-            }
-          },
-        );
+                );
+              }
+            },
+          );
+        }
       },
     );
   }
@@ -194,7 +245,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         String playCount = artist['playcount'].toString();
 
         return FutureBuilder<String>(
-          future: fetchAlbumImageUrl(artistName, artistName),
+          future: fetchArtistImageUrl(artistName),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               // While waiting for the image to load, you can display a loading indicator
