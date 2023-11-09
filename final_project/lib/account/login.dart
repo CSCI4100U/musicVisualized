@@ -4,9 +4,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/db_utils.dart';
 
 class LoginPage extends StatefulWidget {
-  final VoidCallback toggleView;
+  final VoidCallback? toggleView;
 
-  LoginPage({required this.toggleView});
+  LoginPage({this.toggleView});
 
   @override
   _LoginPageState createState() => _LoginPageState();

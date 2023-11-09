@@ -1,6 +1,7 @@
 import 'package:final_project/account/user.dart';
 import 'package:flutter/material.dart';
 import '../utils/db_utils.dart';
+import 'login.dart';
 
 class RegistrationPage extends StatefulWidget {
   final VoidCallback toggleView;
@@ -49,6 +50,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Success!!!!')),
       );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+
     }
   }
 
