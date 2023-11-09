@@ -1,3 +1,5 @@
+import 'package:final_project/account/login.dart';
+import 'package:final_project/account/registration.dart';
 import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
 import 'package:final_project/top_data/top_visulized_data.dart';
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: VisualizedDataPage(),
+      home: LoginPage(),
       //TopScrobblesPage()
       //MostStreamedTracksPage()
       //VisualizedDataPage()
