@@ -2,19 +2,98 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-Future<String> fetchAlbumImageUrl(String artist, String track) async {
+Future<String> fetchAlbumImageUrl(String artist, String album) async {
   await dotenv.load();
-  final apiKey = dotenv.get('API_KEY');
-  final response = await http.get(Uri.parse(
-      'https://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=$apiKey&artist=${Uri.encodeComponent(artist)}&track=${Uri.encodeComponent(track)}&format=json'
-  ));
+  final apiKey = dotenv.get('SPOTIFY_API_KEY');
+  final accessToken = await getSpotifyAccessToken();
+
+  final artistQueryParam = Uri.encodeQueryComponent(artist);
+  final albumQueryParam = Uri.encodeQueryComponent(album);
+
+  final searchUrl = Uri.parse(
+      'https://api.spotify.com/v1/search?q=album:"$albumQueryParam" artist:"$artistQueryParam"&type=album&limit=1'
+  );
+
+  final response = await http.get(searchUrl, headers: {
+    'Authorization': 'Bearer $accessToken',
+  });
+  if (artist == album) {
+    return fetchArtistImageUrl(artist);
+  }
+  if (response.statusCode == 200) {
+    final data = json.decode(response.body);
+    if (data['albums']['items'].isNotEmpty) {
+      final albumImageUrl = data['albums']['items'][0]['images'][0]['url'];
+
+      return albumImageUrl;
+    }
+  }
+
+  // If the artist and album match, return the artist's picture
+
+
+  // Handle error or return a default image URL
+  return 'default_image_url';
+}
+
+Future<String> getSpotifyAccessToken() async {
+  final clientId = dotenv.get('SPOTIFY_CLIENT_ID');
+  final clientSecret = dotenv.get('SPOTIFY_CLIENT_SECRET');
+
+  final clientCredentials = base64Encode(utf8.encode('$clientId:$clientSecret'));
+
+  final response = await http.post(
+    Uri.parse('https://accounts.spotify.com/api/token'),
+    headers: {
+      'Authorization': 'Basic $clientCredentials',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: {'grant_type': 'client_credentials'},
+  );
+
+  if (response.statusCode == 200) {
+    final tokenData = json.decode(response.body);
+    return tokenData['access_token'];
+  } else {
+    throw Exception('Failed to get Spotify access token');
+  }
+}
+
+
+
+Future<String> fetchArtistImageUrl(String artist) async {
+  await dotenv.load();
+  final accessToken = await getSpotifyAccessToken();
+
+  final artistQueryParam = Uri.encodeQueryComponent(artist);
+
+  final searchUrl = Uri.parse(
+      'https://api.spotify.com/v1/search?q=artist:"$artistQueryParam"&type=artist&limit=1'
+  );
+
+  final response = await http.get(searchUrl, headers: {
+    'Authorization': 'Bearer $accessToken',
+  });
 
   if (response.statusCode == 200) {
     final data = json.decode(response.body);
-    final albumImageUrl = data['track']['album']['image'][1]['#text']; // Get the largest image
-    return albumImageUrl;
-  } else {
-    // Handle error or return a default image URL
-    return 'default_image_url';
+    if (data['artists']['items'].isNotEmpty) {
+      final artistId = data['artists']['items'][0]['id'];
+      final artistDetailsUrl = Uri.parse('https://api.spotify.com/v1/artists/$artistId');
+      final artistDetailsResponse = await http.get(artistDetailsUrl, headers: {
+        'Authorization': 'Bearer $accessToken',
+      });
+
+      if (artistDetailsResponse.statusCode == 200) {
+        final artistDetails = json.decode(artistDetailsResponse.body);
+        if (artistDetails['images'].isNotEmpty) {
+          final artistImageUrl = artistDetails['images'][0]['url'];
+          return artistImageUrl;
+        }
+      }
+    }
   }
+
+  // Handle error or return a default image URL
+  return 'default_image_url';
 }

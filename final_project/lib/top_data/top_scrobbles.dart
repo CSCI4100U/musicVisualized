@@ -192,44 +192,57 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         var artist = artists[index];
         String artistName = artist['name'];
         String playCount = artist['playcount'].toString();
-        String imageUrl = artist['image'][1]['#text'] ?? 'assets/default_artist.png';
 
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-          elevation: 5,
-          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          child: ListTile(
-            contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: imageUrl.isNotEmpty
-                  ? Image.network(
-                imageUrl,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(Icons.broken_image);
-                },
-              )
-                  : Image.asset('assets/default_artist.png'),
-            ),
-            title: Text(
-              artistName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            subtitle: Text('Play count: $playCount'),
-            trailing: IconButton(
-              icon: Icon(Icons.more_vert),
-              onPressed: () {
+        return FutureBuilder<String>(
+          future: fetchAlbumImageUrl(artistName, artistName),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              // While waiting for the image to load, you can display a loading indicator
+              return CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              // Handle errors, if any
+              return Text('Error: ${snapshot.error}');
+            } else {
+              // Image is loaded; display it
+              String artistImageUrl = snapshot.data ?? 'assets/default_artist.png'; // Use the artist's image URL
 
-              },
-            ),
-          ),
+              return Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                elevation: 5,
+                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                child: ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  leading: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.network(
+                      artistImageUrl,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(Icons.broken_image);
+                      },
+                    ),
+                  ),
+                  title: Text(
+                    artistName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  subtitle: Text('Play count: $playCount'),
+                  trailing: IconButton(
+                    icon: Icon(Icons.more_vert),
+                    onPressed: () {
+                      // Handle artist-related actions here
+                    },
+                  ),
+                ),
+              );
+            }
+          },
         );
       },
     );
