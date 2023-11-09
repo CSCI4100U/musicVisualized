@@ -1,5 +1,6 @@
 import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
+import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'recent_tracks.dart';
@@ -17,8 +18,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: MostStreamedTracksPage(),
+      home: VisualizedDataPage(),
       //TopScrobblesPage()
+      //MostStreamedTracksPage()
+      //VisualizedDataPage()
     );
   }
 }
