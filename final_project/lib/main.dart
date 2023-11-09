@@ -1,29 +1,64 @@
-import 'package:final_project/account/login.dart';
-import 'package:final_project/account/registration.dart';
-import 'package:final_project/top_data/geo_top_tracks.dart';
-import 'package:final_project/top_data/top_scrobbles.dart';
-import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'recent_tracks.dart';
+import '../account/login.dart';
+import '../account/registration.dart';
 
-Future<void> main() async {
-  await dotenv.load();
-  runApp(MyApp());
-}
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Last.FM Recently Played',
+      title: 'Modern Landing Page',
       theme: ThemeData(
-        primarySwatch: Colors.purple,
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: LoginPage(),
-      //TopScrobblesPage()
-      //MostStreamedTracksPage()
-      //VisualizedDataPage()
+      home: MyHomePage(),
     );
   }
 }
+
+class MyHomePage extends StatelessWidget {
+  void navigateToLogin(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginPage(toggleView: () => navigateToRegister(context)),
+      ),
+    );
+  }
+
+  void navigateToRegister(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RegistrationPage(toggleView: () => navigateToLogin(context)),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Home Page'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              child: Text('Login'),
+              onPressed: () => navigateToLogin(context),
+            ),
+            ElevatedButton(
+              child: Text('Register'),
+              onPressed: () => navigateToRegister(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+

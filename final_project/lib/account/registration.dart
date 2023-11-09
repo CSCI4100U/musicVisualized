@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../utils/db_utils.dart';
 
 class RegistrationPage extends StatefulWidget {
+  final VoidCallback toggleView;
+
+  RegistrationPage({required this.toggleView});
+
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
 }

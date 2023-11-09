@@ -1,7 +1,13 @@
+import 'package:final_project/recent_tracks.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../utils/db_utils.dart';
 
 class LoginPage extends StatefulWidget {
+  final VoidCallback toggleView;
+
+  LoginPage({required this.toggleView});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
@@ -39,6 +45,13 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(content: Text('POGGERS')),
       );
 
+      await dotenv.load();
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RecentTracksPage()),
+        );
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invalid username or password')),
