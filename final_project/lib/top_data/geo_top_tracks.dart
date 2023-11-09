@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:country_picker/country_picker.dart';
+import 'package:geolocator/geolocator.dart';
 
 class MostStreamedTracksPage extends StatefulWidget {
   @override
@@ -12,12 +14,47 @@ class MostStreamedTracksPage extends StatefulWidget {
 class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
   List<dynamic> _tracks = [];
   bool _isLoading = false;
-  String _selectedCountry = 'United States';
+  String _selectedCountry = 'Afghanistan';
 
   @override
   void initState() {
     super.initState();
-    displayTopTracks(_selectedCountry);
+    _determinePosition().then((countryName) {
+      if (countryName != null) {
+        setState(() {
+          _selectedCountry = countryName;
+        });
+        displayTopTracks(_selectedCountry);
+      }
+    });
+  }
+
+  Future<String?> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return null; // Location services are not enabled
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return null; // Permissions are denied
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return null; // Permissions are permanently denied
+    }
+
+    // When we reach here, permissions are granted and we can continue accessing the position of the device.
+    Position position = await Geolocator.getCurrentPosition();
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    return placemarks.first.country; // Get the country name from the first Placemark
   }
 
   Future<List<dynamic>> fetchTopTracks(String country) async {
