@@ -1,4 +1,4 @@
-import 'package:final_project/top_data/geo_top_artist.dart';
+import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
