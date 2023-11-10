@@ -42,7 +42,7 @@ class DatabaseHelper {
       password $textType,
       firstName $textType,
       lastName $textType,
-      dob $textType
+      dob $textType,
       lastfmuser $textType
       )
 ''');
