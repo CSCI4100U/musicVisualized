@@ -80,4 +80,13 @@ class DatabaseHelper {
   }
 
 
+  Future<void> deleteDB() async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'users.db');
+
+    await deleteDatabase(path);
+    print('Database deleted');
+  }
+
+
 }
