@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:flutter_charts/flutter_charts.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:final_project/utils/fetch_data.dart';
+import 'package:final_project/utils/fetch_image.dart';
 
 
 class VisualizedDataPage extends StatefulWidget {
@@ -11,31 +15,42 @@ class VisualizedDataPage extends StatefulWidget {
   _VisualizedDataPageState createState() => _VisualizedDataPageState();
 }
 
-class _VisualizedDataPageState extends State<VisualizedDataPage> {
-  List<Map<String, dynamic>> tracksData = [];
 
+class _VisualizedDataPageState extends State<VisualizedDataPage> {
+  List<dynamic> _topTracks = [];
   @override
   void initState() {
     super.initState();
-    _fetchLastFmData();
+    _fetchTopTrackScrobbles();
+
   }
 
-  Future<void> _fetchLastFmData() async {
-    try {
-      final tracks = await fetchLastFmTracks();
+  void _fetchTopTrackScrobbles() async {
+    await _fetchTopTracks();
+  }
+  Future<void> _fetchTopTracks() async {
+    final String _apiKey = dotenv.get('API_KEY');
+    final String _user = dotenv.get('USER');
+    final response = await http.get(
+      Uri.parse(
+          'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$_user&api_key=$_apiKey&format=json&limit=10'
+      ),
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
       setState(() {
-        tracksData = tracks;
+        _topTracks = data['toptracks']['track'];
       });
-       // Print the data to the console
-    } catch (e) {
-      print('Error fetching Last.fm data: $e');
     }
+
+
+
+
   }
 
   @override
   Widget build(BuildContext context) {
-    print("hi console");
-    print(tracksData);
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
@@ -45,18 +60,17 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-              width: MediaQuery.of(context).size.width, // Adjust width as needed
-              height: 300,
-
+              width: MediaQuery.of(context).size.width,
+              height: 600,
               child: SfCartesianChart(
                 primaryXAxis: CategoryAxis(),
                 enableAxisAnimation: true,
-                series: <BarSeries<Map<String, dynamic>, String>>[
-                  BarSeries<Map<String, dynamic>, String>(
-                    dataSource: tracksData,
-
-                    xValueMapper: ( tracks, _) => tracks['name'], // X-axis shows song names
-                    yValueMapper: (tracks, _) => tracks['playcount'], // Y-axis shows play count
+                series: <BarSeries<dynamic, String>>[
+                  BarSeries<dynamic, String>(
+                    dataSource: _topTracks.cast<Map<String, dynamic>>(),
+                    xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
+                    yValueMapper: (dynamic tracks, _) => double.tryParse(tracks['playcount'] ?? '0') ?? 0,
+                    dataLabelSettings: DataLabelSettings(isVisible: true),
                   ),
                 ],
               ),
@@ -66,4 +80,4 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       ),
     );
   }
-}
+ }
