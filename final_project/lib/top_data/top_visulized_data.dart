@@ -9,31 +9,30 @@ import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:final_project/utils/fetch_data.dart';
 import 'package:final_project/utils/fetch_image.dart';
 
-
 class VisualizedDataPage extends StatefulWidget {
   @override
   _VisualizedDataPageState createState() => _VisualizedDataPageState();
 }
 
-
 class _VisualizedDataPageState extends State<VisualizedDataPage> {
   List<dynamic> _topTracks = [];
+
   @override
   void initState() {
     super.initState();
     _fetchTopTrackScrobbles();
-
   }
 
   void _fetchTopTrackScrobbles() async {
     await _fetchTopTracks();
   }
+
   Future<void> _fetchTopTracks() async {
     final String _apiKey = dotenv.get('API_KEY');
     final String _user = dotenv.get('USER');
     final response = await http.get(
       Uri.parse(
-          'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$_user&api_key=$_apiKey&format=json&limit=10'
+        'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$_user&api_key=$_apiKey&format=json&limit=20',
       ),
     );
 
@@ -43,10 +42,6 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
         _topTracks = data['toptracks']['track'];
       });
     }
-
-
-
-
   }
 
   @override
@@ -55,29 +50,31 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       appBar: AppBar(
         title: Text('Visualized Data'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: 600,
-              child: SfCartesianChart(
-                primaryXAxis: CategoryAxis(),
-                enableAxisAnimation: true,
-                series: <BarSeries<dynamic, String>>[
-                  BarSeries<dynamic, String>(
-                    dataSource: _topTracks.cast<Map<String, dynamic>>(),
-                    xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
-                    yValueMapper: (dynamic tracks, _) => double.tryParse(tracks['playcount'] ?? '0') ?? 0,
-                    dataLabelSettings: DataLabelSettings(isVisible: true),
-                  ),
-                ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: 600,
+                child: SfCartesianChart(
+                  primaryXAxis: CategoryAxis(),
+                  enableAxisAnimation: true,
+                  series: <BarSeries<dynamic, String>>[
+                    BarSeries<dynamic, String>(
+                      dataSource: _topTracks.cast<Map<String, dynamic>>(),
+                      xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
+                      yValueMapper: (dynamic tracks, _) => double.tryParse(tracks['playcount'] ?? '0') ?? 0,
+                      dataLabelSettings: DataLabelSettings(isVisible: true),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
- }
+}
