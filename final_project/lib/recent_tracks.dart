@@ -1,4 +1,6 @@
+import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
+import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -81,13 +83,17 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Recent Tracks'),
+        automaticallyImplyLeading: false,
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.swap_horiz),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TopScrobblesPage()),
-            ),
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer(); // This will open the end drawer
+                },
+              );
+            },
           ),
         ],
       ),
@@ -97,6 +103,72 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
           return TrackListTile(track: _tracks[index]);
         },
       ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Navigation Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.music_note),
+              title: Text('Top Scrobbles'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TopScrobblesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history),
+              title: Text('Recent Tracks'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                // Assuming you want to refresh the current page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => RecentTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.language),
+              title: Text('Top Tracks by Country'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.bar_chart),
+              title: Text('Data Visualized'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+                );
+              },
+            ),
+            // Add more ListTiles for other navigation options
+          ],
+        ),
+      ),
     );
+
   }
 }

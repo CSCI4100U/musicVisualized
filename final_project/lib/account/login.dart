@@ -46,12 +46,12 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       await dotenv.load();
-      Future.delayed(Duration(seconds: 2), () {
+
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => RecentTracksPage()),
         );
-      });
+
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Invalid username or password')),

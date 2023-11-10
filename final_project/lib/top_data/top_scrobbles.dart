@@ -1,3 +1,5 @@
+import 'package:final_project/top_data/geo_top_tracks.dart';
+import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -98,15 +100,21 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Top Scrobbles'),actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.swap_horiz),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => RecentTracksPage()),
+        title: Text('Top Scrobbles'),
+        actions: <Widget>[
+
+          // The Builder is used here to provide a context below the Scaffold
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openEndDrawer(); // This will open the end drawer
+                },
+              );
+            },
           ),
-        ),
-      ],
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -125,8 +133,71 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
           _buildArtistList(_topArtists),
         ],
       ),
+      // Here is the endDrawer added to your existing Scaffold
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Navigation Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.music_note),
+              title: Text('Top Scrobbles'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                // Navigate to TopScrobblesPage or refresh the page if needed
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history),
+              title: Text('Recent Tracks'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => RecentTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.language),
+              title: Text('Top Tracks by Country'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.bar_chart),
+              title: Text('Data Visualized'),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+                );
+              },
+            ),
+            // Add more ListTiles for other navigation options
+          ],
+        ),
+      ),
     );
   }
+
 
   Widget _buildList(List<dynamic> items) {
     return ListView.builder(
