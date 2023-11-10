@@ -1,6 +1,7 @@
 import 'package:final_project/recent_tracks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:sqflite/sqflite.dart';
 import '../utils/db_utils.dart';
 
 class LoginPage extends StatefulWidget {
@@ -43,8 +44,8 @@ class _LoginPageState extends State<LoginPage> {
     if (isValidUser) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('POGGERS')),
-      );
 
+      );
       await dotenv.load();
 
         Navigator.pushReplacement(

@@ -6,6 +6,7 @@ class User {
   final String firstName;
   final String lastName;
   final String dob;
+  final String lastfmuser;
 
   User({
     this.id,
@@ -15,6 +16,7 @@ class User {
     required this.firstName,
     required this.lastName,
     required this.dob,
+    required this.lastfmuser,
   });
 
   User.fromMap(Map<String, dynamic> res)
@@ -24,7 +26,8 @@ class User {
         password = res["password"],
         firstName = res["firstName"],
         lastName = res["lastName"],
-        dob = res["dob"];
+        dob = res["dob"],
+        lastfmuser = res["lastfmuser"];
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -34,5 +37,6 @@ class User {
     'firstName': firstName,
     'lastName': lastName,
     'dob': dob,
+    'lastfmuser': lastfmuser,
   };
 }

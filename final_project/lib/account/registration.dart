@@ -20,6 +20,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController dobController = TextEditingController();
+  TextEditingController lastfmuserController = TextEditingController();
 
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
 
@@ -31,6 +32,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     firstNameController.dispose();
     lastNameController.dispose();
     dobController.dispose();
+    lastfmuserController.dispose();
     super.dispose();
   }
 
@@ -43,6 +45,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         firstName: firstNameController.text,
         lastName: lastNameController.text,
         dob: dobController.text,
+        lastfmuser: lastfmuserController.text,
       );
 
       await _databaseHelper.createUser(newUser);
@@ -126,6 +129,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
               controller: dobController,
               decoration: InputDecoration(labelText: 'Date of Birth'),
               keyboardType: TextInputType.datetime,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
+            ),
+            TextFormField(
+              controller: lastfmuserController,
+              decoration: InputDecoration(labelText: 'LastFM Username'),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';

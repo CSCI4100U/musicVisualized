@@ -43,6 +43,7 @@ class DatabaseHelper {
       firstName $textType,
       lastName $textType,
       dob $textType
+      lastfmuser $textType
       )
 ''');
 
