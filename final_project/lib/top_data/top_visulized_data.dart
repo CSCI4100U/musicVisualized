@@ -1,14 +1,9 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_charts/flutter_charts.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:final_project/utils/fetch_data.dart';
-import 'package:final_project/utils/fetch_image.dart';
+import 'package:flutter/material.dart'; // for general Flutter widgets and MaterialApp
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // for environment variables
+import 'package:http/http.dart' as http; // for making HTTP requests
+import 'dart:convert'; // for JSON processing
+import 'package:shared_preferences/shared_preferences.dart'; // for local storage
+import 'package:syncfusion_flutter_charts/charts.dart'; // for Syncfusion charts
 import '../utils/db_utils.dart';
 
 class VisualizedDataPage extends StatefulWidget {
@@ -23,6 +18,25 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
   void initState() {
     super.initState();
     _fetchTopTrackScrobbles();
+  }
+  void _showWelcomeDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Welcome"),
+          content: Text("This is the Visualized Data Page."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _fetchTopTrackScrobbles() async {
