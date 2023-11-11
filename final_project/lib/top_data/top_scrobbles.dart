@@ -66,7 +66,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
-      // Handle exceptions
     }
   }
 
@@ -100,7 +99,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
-      // Handle exceptions
+
     }
   }
 
@@ -134,7 +133,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
-      // Handle exceptions
+
     }
   }
 
@@ -146,14 +145,12 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       appBar: AppBar(
         title: Text('Top Scrobbles'),
         actions: <Widget>[
-
-          // The Builder is used here to provide a context below the Scaffold
           Builder(
             builder: (context) {
               return IconButton(
                 icon: Icon(Icons.menu),
                 onPressed: () {
-                  Scaffold.of(context).openEndDrawer(); // This will open the end drawer
+                  Scaffold.of(context).openEndDrawer();
                 },
               );
             },
@@ -177,7 +174,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
           _buildArtistList(_topArtists),
         ],
       ),
-      // Here is the endDrawer added to your existing Scaffold
       endDrawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -198,15 +194,14 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
               leading: Icon(Icons.music_note),
               title: Text('Top Scrobbles'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Navigate to TopScrobblesPage or refresh the page if needed
+                Navigator.pop(context);
               },
             ),
             ListTile(
               leading: Icon(Icons.history),
               title: Text('Recent Tracks'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => RecentTracksPage()),
@@ -217,7 +212,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
               leading: Icon(Icons.language),
               title: Text('Top Tracks by Country'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
@@ -228,14 +223,13 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
               leading: Icon(Icons.bar_chart),
               title: Text('Data Visualized'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => VisualizedDataPage()),
                 );
               },
             ),
-            // Add more ListTiles for other navigation options
           ],
         ),
       ),
@@ -259,7 +253,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return CircularProgressIndicator();
               }  else {
-                String imageUrl = snapshot.data ?? 'http://mcgodftw.dev/i/r2kyqb6k.png'; // Fallback URL in case of error
+                String imageUrl = snapshot.data ?? 'http://mcgodftw.dev/i/r2kyqb6k.png';
                 return Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -307,7 +301,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                 return CircularProgressIndicator();
               } else {
                 String imageUrl = snapshot.data ??
-                    'http://mcgodftw.dev/i/r2kyqb6k.png'; // Fallback URL in case of error
+                    'http://mcgodftw.dev/i/r2kyqb6k.png';
                 return Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
@@ -363,14 +357,11 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
           future: fetchArtistImageUrl(artistName),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              // While waiting for the image to load, you can display a loading indicator
               return CircularProgressIndicator();
             } else if (snapshot.hasError) {
-              // Handle errors, if any
               return Text('Error: ${snapshot.error}');
             } else {
-              // Image is loaded; display it
-              String artistImageUrl = snapshot.data ?? 'assets/default_artist.png'; // Use the artist's image URL
+              String artistImageUrl = snapshot.data ?? 'assets/default_artist.png';
 
               return Card(
                 shape: RoundedRectangleBorder(
@@ -402,7 +393,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                   trailing: IconButton(
                     icon: Icon(Icons.more_vert),
                     onPressed: () {
-                      // Handle artist-related actions here
                     },
                   ),
                 ),

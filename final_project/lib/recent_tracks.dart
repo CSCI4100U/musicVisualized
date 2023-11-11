@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'track_tile.dart';
-import '../utils/db_utils.dart'; // Ensure this import is correct
+import '../utils/db_utils.dart';
 
 class RecentTracksPage extends StatefulWidget {
   @override
@@ -101,7 +101,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
               return IconButton(
                 icon: Icon(Icons.menu),
                 onPressed: () {
-                  Scaffold.of(context).openEndDrawer(); // This will open the end drawer
+                  Scaffold.of(context).openEndDrawer();
                 },
               );
             },
@@ -153,7 +153,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
               leading: Icon(Icons.music_note),
               title: Text('Top Scrobbles'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => TopScrobblesPage()),
@@ -164,8 +164,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
               leading: Icon(Icons.history),
               title: Text('Recent Tracks'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
-                // Assuming you want to refresh the current page
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => RecentTracksPage()),
@@ -176,7 +175,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
               leading: Icon(Icons.language),
               title: Text('Top Tracks by Country'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
@@ -187,14 +186,13 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
               leading: Icon(Icons.bar_chart),
               title: Text('Data Visualized'),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => VisualizedDataPage()),
                 );
               },
             ),
-            // Add more ListTiles for other navigation options
           ],
         ),
       ),
