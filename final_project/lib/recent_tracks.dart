@@ -1,3 +1,4 @@
+import 'package:final_project/about_me/about_page.dart';
 import 'package:final_project/account/user.dart';
 import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
@@ -190,6 +191,17 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('About Me'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutMePage()),
                 );
               },
             ),
