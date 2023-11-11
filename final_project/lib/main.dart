@@ -1,5 +1,6 @@
 import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../account/login.dart';
 import '../account/registration.dart';
 
@@ -39,6 +40,14 @@ class MyHomePage extends StatelessWidget {
   }
 
   @override
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.clear();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -62,4 +71,3 @@ class MyHomePage extends StatelessWidget {
     );
   }
 }
-

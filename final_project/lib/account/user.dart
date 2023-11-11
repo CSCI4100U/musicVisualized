@@ -19,6 +19,10 @@ class User {
     required this.lastfmuser,
   });
 
+  String getUsername() {
+    return username;
+  }
+
   User.fromMap(Map<String, dynamic> res)
       : id = res["id"],
         username = res["username"],

@@ -79,6 +79,22 @@ class DatabaseHelper {
     return false;
   }
 
+  Future<String?> getLastFmUsername(String username) async {
+    final db = await database;
+    final result = await db.query(
+      'users',
+      columns: ['lastfmuser'],
+      where: 'username = ?',
+      whereArgs: [username],
+    );
+
+    if (result.isNotEmpty) {
+      return result.first['lastfmuser'] as String?;
+    } else {
+      return null;
+    }
+  }
+
 
   Future<void> deleteDB() async {
     var databasesPath = await getDatabasesPath();

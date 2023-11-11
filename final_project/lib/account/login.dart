@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:sqflite/sqflite.dart';
 import '../utils/db_utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   final VoidCallback? toggleView;
@@ -44,8 +45,9 @@ class _LoginPageState extends State<LoginPage> {
     if (isValidUser) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('POGGERS')),
-
       );
+
+      saveCurrentUser(_usernameController.text);
       await dotenv.load();
 
         Navigator.pushReplacement(
@@ -58,6 +60,11 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(content: Text('Invalid username or password')),
       );
     }
+  }
+
+  Future<void> saveCurrentUser(String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
   }
 
   @override

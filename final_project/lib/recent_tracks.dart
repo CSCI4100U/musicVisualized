@@ -1,12 +1,14 @@
+import 'package:final_project/account/user.dart';
 import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
 import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'track_tile.dart';
-
+import '../utils/db_utils.dart'; // Ensure this import is correct
 
 class RecentTracksPage extends StatefulWidget {
   @override
@@ -14,8 +16,6 @@ class RecentTracksPage extends StatefulWidget {
 }
 
 class _RecentTracksPageState extends State<RecentTracksPage> {
-  final String _apiKey = dotenv.get('API_KEY');
-  final String _user = dotenv.get('USER');
   List<dynamic> _tracks = [];
   bool _isLoading = true;
   String? _error;
@@ -26,36 +26,47 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     _fetchRecentTracks();
   }
 
-  Future<void> _fetchRecentTracks() async {
-    setState(() => _isLoading = true);
+  void _fetchRecentTracks() async {
     try {
-      final response = await http.get(Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=$_user&api_key=$_apiKey&format=json&limit=10'));
+      final prefs = await SharedPreferences.getInstance();
+      final String? currentUser = prefs.getString('username');
+
+      if (currentUser == null) {
+        throw Exception('No current user found');
+      }
+
+      final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+      final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
+
+      if (lastFmUsername == null) {
+        throw Exception('Last.fm username not found for current user');
+      }
+
+      final String _apiKey = dotenv.get('API_KEY');
+      final response = await http.get(
+        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'),
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        if (data['error'] != null) {
-          setState(() {
-            _error = data['message'];
-            _isLoading = false;
-          });
-        } else {
-          setState(() {
-            _tracks = data['recenttracks']['track'];
-            _isLoading = false;
-          });
-        }
-      } else {
         setState(() {
-          _error = 'Failed to load tracks. Status Code: ${response.statusCode}';
+          _tracks = data['recenttracks']['track'];
           _isLoading = false;
         });
+      } else {
+        throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
       setState(() {
-        _error = 'An error occurred: $e';
+        _error = e.toString();
         _isLoading = false;
       });
     }
+  }
+
+  Future<String?> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username');
   }
 
   @override
@@ -111,12 +122,31 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
-              child: Text(
-                'Navigation Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: FutureBuilder<String?>(
+                future: getCurrentUser(),
+                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData) {
+                      return Text(
+                        snapshot.data!,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    } else {
+                      return Text(
+                        'Guest',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    }
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
               ),
             ),
             ListTile(
