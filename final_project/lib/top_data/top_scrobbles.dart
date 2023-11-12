@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:final_project/utils/fetch_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../about_me/about_page.dart';
 import '../utils/db_utils.dart';
 
 import '../recent_tracks.dart';
@@ -71,6 +72,10 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     );
   }
 
+  Future<String?> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username');
+  }
 
   void _fetchData() async {
     await _fetchTopTracks();
@@ -189,6 +194,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: Text('Top Scrobbles'),
+        automaticallyImplyLeading: false,
         actions: <Widget>[
           Builder(
             builder: (context) {
@@ -227,12 +233,31 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
-              child: Text(
-                'Navigation Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: FutureBuilder<String?>(
+                future: getCurrentUser(),
+                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData) {
+                      return Text(
+                        snapshot.data!,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    } else {
+                      return Text(
+                        'Guest',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    }
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
               ),
             ),
             ListTile(
@@ -240,6 +265,10 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
               title: Text('Top Scrobbles'),
               onTap: () {
                 Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TopScrobblesPage()),
+                );
               },
             ),
             ListTile(
@@ -267,13 +296,22 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
             ListTile(
               leading: Icon(Icons.bar_chart),
               title: Text('Data Visualized'),
-
               onTap: () {
-
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('About Me'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutMePage()),
                 );
               },
             ),

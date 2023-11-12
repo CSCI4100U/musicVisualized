@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http; // for making HTTP requests
 import 'dart:convert'; // for JSON processing
 import 'package:shared_preferences/shared_preferences.dart'; // for local storage
 import 'package:syncfusion_flutter_charts/charts.dart'; // for Syncfusion charts
+import '../about_me/about_page.dart';
 import '../utils/db_utils.dart';
 import 'top_scrobbles.dart'; // Ensure you have this page
 import '../recent_tracks.dart'; // Ensure you have this page
@@ -96,6 +97,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
+        automaticallyImplyLeading: false,
       ),
       endDrawer: Drawer(
         child: ListView(
@@ -105,12 +107,31 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
               decoration: BoxDecoration(
                 color: Colors.blue,
               ),
-              child: Text(
-                'Navigation Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+              child: FutureBuilder<String?>(
+                future: getCurrentUser(),
+                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData) {
+                      return Text(
+                        snapshot.data!,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    } else {
+                      return Text(
+                        'Guest',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    }
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
               ),
             ),
             ListTile(
@@ -118,9 +139,9 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
               title: Text('Top Scrobbles'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context)=> TopScrobblesPage())
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TopScrobblesPage()),
                 );
               },
             ),
@@ -149,11 +170,23 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
             ListTile(
               leading: Icon(Icons.bar_chart),
               title: Text('Data Visualized'),
-
               onTap: () {
-
                 Navigator.pop(context);
-
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('About Me'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutMePage()),
+                );
               },
             ),
           ],

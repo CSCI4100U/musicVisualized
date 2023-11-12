@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../recent_tracks.dart';
+import '../top_data/geo_top_tracks.dart';
+import '../top_data/top_scrobbles.dart';
+import '../top_data/top_visulized_data.dart';
 import 'about_me.dart';
 import 'data_entry_form.dart';
 
@@ -45,19 +49,136 @@ class _AboutMePageState extends State<AboutMePage> {
         MaterialPageRoute(builder: (context) => DataEntryForm()));
   }
 
+  Future<String?> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('username');
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('About Me'),
-        backgroundColor: Colors.deepPurple, // Modern color for AppBar
+        backgroundColor: Colors.deepPurple,
         elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: <Widget>[
+          Builder(
+            builder: (context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () => Scaffold.of(context).openEndDrawer(),
+              );
+            },
+          ),
+        ],
       ),
       body: aboutData == null
           ? Center(child: CircularProgressIndicator())
           : _buildProfileView(),
+      endDrawer: _buildDrawer(),
     );
   }
+
+  Widget _buildDrawer() {
+    // You can customize this drawer with your own items
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: <Widget>[
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: FutureBuilder<String?>(
+              future: getCurrentUser(),
+              builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      snapshot.data!,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    );
+                  } else {
+                    return Text(
+                      'Guest',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    );
+                  }
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.music_note),
+            title: Text('Top Scrobbles'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TopScrobblesPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.history),
+            title: Text('Recent Tracks'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => RecentTracksPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.language),
+            title: Text('Top Tracks by Country'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.bar_chart),
+            title: Text('Data Visualized'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.people),
+            title: Text('About Me'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => AboutMePage()),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
 
   Widget _buildProfileView() {
     return SingleChildScrollView(
