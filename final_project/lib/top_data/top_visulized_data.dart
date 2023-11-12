@@ -13,33 +13,39 @@ class VisualizedDataPage extends StatefulWidget {
 
 class _VisualizedDataPageState extends State<VisualizedDataPage> {
   List<dynamic> _topTracks = [];
+  bool _isDialogShown = false;
 
   @override
   void initState() {
     super.initState();
     _fetchTopTrackScrobbles();
+
   }
-  void _showWelcomeDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Welcome"),
-          content: Text("This is the Visualized Data Page."),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+  void _showVisualiseDialog() {
+    if (!_isDialogShown) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Welcome"),
+            content: Text("This is the Visualized Data Page."),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      _isDialogShown = true;
+    }
   }
 
   void _fetchTopTrackScrobbles() async {
+
     await _fetchTopTracks();
   }
 
@@ -74,6 +80,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       final data = json.decode(response.body);
       setState(() {
         _topTracks = data['toptracks']['track'];
+        _showVisualiseDialog();
       });
     }
   }
@@ -93,6 +100,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
                 width: MediaQuery.of(context).size.width,
                 height: 600,
                 child: SfCartesianChart(
+
                   primaryXAxis: CategoryAxis(),
                   enableAxisAnimation: true,
                   series: <BarSeries<dynamic, String>>[

@@ -20,11 +20,55 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
   List<dynamic> _tracks = [];
   bool _isLoading = true;
   String? _error;
+  bool _isDialogShown = false;
 
   @override
   void initState() {
     super.initState();
     _fetchRecentTracks();
+  }
+  void _showRecentDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Welcome"),
+          content: Text("This is the Recent Track Page."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showRecent2Dialog();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showRecent2Dialog() {
+    if (!_isDialogShown) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Recent Tracks"),
+            content: Text(
+                "Explore your Recent Tracks page to see your latest music listens and stay updated with your current musical journey!"),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      _isDialogShown = true;
+    }
   }
 
   void _fetchRecentTracks() async {
@@ -42,7 +86,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
       if (lastFmUsername == null) {
         throw Exception('Last.fm username not found for current user');
       }
-
+      print("Last Fm user is: $lastFmUsername");
       final String _apiKey = dotenv.get('API_KEY');
       final response = await http.get(
         Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'),
@@ -53,6 +97,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
         setState(() {
           _tracks = data['recenttracks']['track'];
           _isLoading = false;
+          _showRecentDialog();
         });
       } else {
         throw Exception('Failed to fetch data: ${response.statusCode}');
@@ -67,7 +112,9 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
 
   Future<String?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
+
     return prefs.getString('username');
+
   }
 
   @override

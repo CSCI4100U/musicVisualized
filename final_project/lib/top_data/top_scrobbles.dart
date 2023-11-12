@@ -20,6 +20,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   List<dynamic> _topTracks = [];
   List<dynamic> _topAlbums = [];
   List<dynamic> _topArtists = [];
+  bool _isDialogShown = false;
 
   @override
   void initState() {
@@ -27,6 +28,49 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     _tabController = TabController(vsync: this, length: 3);
     _fetchData();
   }
+  void _showScrobbleDialog() {
+    if (!_isDialogShown) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Welcome"),
+          content: Text("This is the Scrobble Data Page."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showScrobble2Dialog();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    _isDialogShown = true;
+  }
+  }
+  void _showScrobble2Dialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Scrobble"),
+          content: Text("Welcome to the Scrobble Page! Discover your music listening trends and explore personalized insights based on your track history."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   void _fetchData() async {
     await _fetchTopTracks();
@@ -62,6 +106,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         setState(() {
           _topArtists = data['topartists']['artist'];
         });
+        _showScrobbleDialog();
       } else {
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
@@ -222,7 +267,9 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
             ListTile(
               leading: Icon(Icons.bar_chart),
               title: Text('Data Visualized'),
+
               onTap: () {
+
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
