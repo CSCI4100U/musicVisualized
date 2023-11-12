@@ -5,9 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../account/login.dart';
 import '../account/registration.dart';
 
+
 Future<void> main() async {
   // WidgetsFlutterBinding.ensureInitialized();
   // await Firebase.initializeApp();
+
   runApp(MyApp());
 }
 
@@ -26,6 +28,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
+
   void navigateToLogin(BuildContext context) {
     Navigator.push(
       context,
@@ -33,7 +36,9 @@ class MyHomePage extends StatelessWidget {
         builder: (context) => LoginPage(toggleView: () => navigateToRegister(context)),
       ),
     );
+
   }
+
 
   void navigateToRegister(BuildContext context) {
     Navigator.push(

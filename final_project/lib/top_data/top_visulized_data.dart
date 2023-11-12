@@ -5,6 +5,10 @@ import 'dart:convert'; // for JSON processing
 import 'package:shared_preferences/shared_preferences.dart'; // for local storage
 import 'package:syncfusion_flutter_charts/charts.dart'; // for Syncfusion charts
 import '../utils/db_utils.dart';
+import 'top_scrobbles.dart'; // Ensure you have this page
+import '../recent_tracks.dart'; // Ensure you have this page
+import 'geo_top_tracks.dart'; // Ensure you have this page
+
 
 class VisualizedDataPage extends StatefulWidget {
   @override
@@ -85,11 +89,75 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Navigation Menu',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.music_note),
+              title: Text('Top Scrobbles'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context)=> TopScrobblesPage())
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history),
+              title: Text('Recent Tracks'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => RecentTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.language),
+              title: Text('Top Tracks by Country'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.bar_chart),
+              title: Text('Data Visualized'),
+
+              onTap: () {
+
+                Navigator.pop(context);
+
+              },
+            ),
+          ],
+        ),
       ),
       body: SingleChildScrollView(
         child: Center(
