@@ -16,6 +16,8 @@ class _DataEntryFormState extends State<DataEntryForm> {
   String favoriteGenre = '';
   String bio = '';
   String profilePicUrl = '';
+  List followers = <String> [];
+  List following = <String> [];
 
   @override
   Widget build(BuildContext context) {
@@ -74,19 +76,24 @@ class _DataEntryFormState extends State<DataEntryForm> {
     final String? username = prefs.getString('username');
 
     if (username != null) {
-      FirebaseFirestore.instance.collection('aboutme').add({
-        'username': username,
+      // Add or update user data in Firestore
+      final userRef = FirebaseFirestore.instance.collection('users').doc(username);
+      await userRef.set({
         'name': name,
         'favoriteGenre': favoriteGenre,
         'bio': bio,
         'profilePicUrl': profilePicUrl,
-      }).then((_) {
-        if (mounted) {
-          Navigator.of(context).pop();
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => AboutMePage()));
-        }
-      });
+        'followers': followers,
+        'following': following,
+      }, SetOptions(merge: true));
+
+      // Navigate back to AboutMePage
+      if (mounted) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => AboutMePage()));
+      }
     }
   }
+
 }

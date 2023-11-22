@@ -27,9 +27,9 @@ class _AboutMePageState extends State<AboutMePage> {
     final String? username = prefs.getString('username');
 
     if (username != null) {
-      FirebaseFirestore.instance.collection('aboutme').where(
-          'username', isEqualTo: username).limit(1).get().then((
-          QuerySnapshot snapshot) {
+      FirebaseFirestore.instance.collection('aboutme')
+          .where('username', isEqualTo: username).limit(1).get()
+          .then((QuerySnapshot snapshot) {
         if (snapshot.docs.isNotEmpty) {
           setState(() {
             aboutData = AboutData.fromMap(
@@ -43,6 +43,7 @@ class _AboutMePageState extends State<AboutMePage> {
       });
     }
   }
+
 
   void _promptForDataEntry() {
     Navigator.of(context).push(
@@ -207,6 +208,8 @@ class _AboutMePageState extends State<AboutMePage> {
             SizedBox(height: 15),
             _buildInfoCard('Favorite Genre: ${aboutData!.favoriteGenre}'),
             _buildInfoCard('Bio: ${aboutData!.bio}'),
+            _buildInfoCard('Followers: ${aboutData!.followers.length}'),
+            _buildInfoCard('Following: ${aboutData!.following.length}'),
           ],
         ),
       ),
