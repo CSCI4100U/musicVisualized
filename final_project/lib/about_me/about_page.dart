@@ -261,7 +261,9 @@ class ProfileSearchDelegate extends SearchDelegate {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('aboutme')
-          .where('username', isGreaterThanOrEqualTo: query)
+          .orderBy('username')
+          .startAt([query])
+          .endAt([query + '\uf8ff'])
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) return CircularProgressIndicator();
@@ -281,13 +283,13 @@ class ProfileSearchDelegate extends SearchDelegate {
                   ),
                 );
               },
-
             );
           },
         );
       },
     );
   }
+
 
   @override
   Widget buildSuggestions(BuildContext context) {

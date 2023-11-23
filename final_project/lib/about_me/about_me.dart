@@ -1,4 +1,5 @@
 class AboutData {
+  String username;
   String name;
   String favoriteGenre;
   String bio;
@@ -7,6 +8,7 @@ class AboutData {
   List<String> followers;
 
   AboutData({
+    required this.username,
     required this.name,
     required this.favoriteGenre,
     required this.bio,
@@ -17,6 +19,7 @@ class AboutData {
 
   factory AboutData.fromMap(Map<String, dynamic> data) {
     return AboutData(
+      username: data['username'],
       name: data['name'],
       favoriteGenre: data['favoriteGenre'],
       bio: data['bio'],
@@ -28,6 +31,7 @@ class AboutData {
 
   Map<String, dynamic> toMap() {
     return {
+      'username': username,
       'name': name,
       'favoriteGenre': favoriteGenre,
       'bio': bio,
