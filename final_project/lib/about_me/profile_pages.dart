@@ -9,57 +9,93 @@ class UserProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(userData.name),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 40),
-              CircleAvatar(
-                backgroundImage: NetworkImage(userData.profilePicUrl),
-                radius: 60,
-                backgroundColor: Colors.deepPurple.shade50,
+        child: Column(
+          children: [
+            _TopGradientSection(userData: userData),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    userData.name,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline6
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    userData.favoriteGenre,
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(userData.bio),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildInfoCard('Followers: ${userData.followers.length}'),
+                      _buildInfoCard('Following: ${userData.following.length}'),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildActionButton(Icons.person_add_alt_1, "Follow"),
+                      const SizedBox(width: 16),
+                      _buildActionButton(Icons.message_rounded, "Message", backgroundColor: Colors.red),
+                    ],
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
-              Text(
-                userData.name,
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-              ),
-              SizedBox(height: 15),
-              _buildInfoCard('Favorite Genre: ${userData.favoriteGenre}'),
-              _buildInfoCard('Bio: ${userData.bio}'),
-              _buildInfoCard('Followers: ${userData.followers.length}'),
-              _buildInfoCard('Following: ${userData.following.length}'),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildActionButton(IconData icon, String label, {Color backgroundColor = Colors.deepPurple}) {
+    return FloatingActionButton.extended(
+      onPressed: () {},
+      elevation: 0,
+      backgroundColor: backgroundColor,
+      icon: Icon(icon),
+      label: Text(label),
     );
   }
 
   Widget _buildInfoCard(String text) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.deepPurple.shade50,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
         text,
-        style: TextStyle(fontSize: 18),
-        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 16),
       ),
     );
   }
 }
+
+class _TopGradientSection extends StatelessWidget {
+  final AboutData userData;
+
+  _TopGradientSection({required this.userData});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircleAvatar(
+        radius: 60,
+        backgroundImage: NetworkImage(userData.profilePicUrl),
+      ),
+    );
+  }
+}
+
+
