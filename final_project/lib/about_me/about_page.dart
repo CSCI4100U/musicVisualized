@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project/about_me/profile_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../recent_tracks.dart';
@@ -66,11 +67,12 @@ class _AboutMePageState extends State<AboutMePage> {
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: <Widget>[
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () => Scaffold.of(context).openEndDrawer(),
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              showSearch(
+                context: context,
+                delegate: ProfileSearchDelegate(),
               );
             },
           ),
@@ -84,7 +86,6 @@ class _AboutMePageState extends State<AboutMePage> {
   }
 
   Widget _buildDrawer() {
-    // You can customize this drawer with your own items
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -183,12 +184,10 @@ class _AboutMePageState extends State<AboutMePage> {
 
   Widget _buildProfileView() {
     return SingleChildScrollView(
-      child: Center( // Wrap the Column with a Center widget
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          // Center content vertically
           crossAxisAlignment: CrossAxisAlignment.center,
-          // Center content horizontally
           children: [
             SizedBox(height: 40),
             CircleAvatar(
@@ -227,8 +226,72 @@ class _AboutMePageState extends State<AboutMePage> {
       child: Text(
         text,
         style: TextStyle(fontSize: 18),
-        textAlign: TextAlign.center, // Center text inside the card
+        textAlign: TextAlign.center,
       ),
     );
   }
 }
+class ProfileSearchDelegate extends SearchDelegate {
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return [
+      IconButton(
+        icon: Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      icon: Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    if (query.isEmpty) return Container();
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('aboutme')
+          .where('username', isGreaterThanOrEqualTo: query)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return CircularProgressIndicator();
+
+        var docs = snapshot.data!.docs;
+        return ListView.builder(
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            var data = docs[index].data() as Map<String, dynamic>;
+            return ListTile(
+              title: Text(data['username']),
+              subtitle: Text(data['bio']),
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => UserProfilePage(userData: AboutData.fromMap(data)),
+                  ),
+                );
+              },
+
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return Container();
+  }
+}
+

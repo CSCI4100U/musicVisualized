@@ -76,7 +76,6 @@ class _DataEntryFormState extends State<DataEntryForm> {
     final String? username = prefs.getString('username');
 
     if (username != null) {
-      // Add or update user data in Firestore
       final userRef = FirebaseFirestore.instance.collection('users').doc(username);
       await userRef.set({
         'name': name,
@@ -86,8 +85,6 @@ class _DataEntryFormState extends State<DataEntryForm> {
         'followers': followers,
         'following': following,
       }, SetOptions(merge: true));
-
-      // Navigate back to AboutMePage
       if (mounted) {
         Navigator.of(context).pop();
         Navigator.of(context).pushReplacement(
