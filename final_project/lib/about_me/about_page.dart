@@ -65,7 +65,7 @@ class _AboutMePageState extends State<AboutMePage> {
         title: Text('About Me'),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
@@ -81,7 +81,7 @@ class _AboutMePageState extends State<AboutMePage> {
       body: aboutData == null
           ? Center(child: CircularProgressIndicator())
           : _buildProfileView(),
-      endDrawer: _buildDrawer(),
+      drawer: _buildDrawer(),
     );
   }
 

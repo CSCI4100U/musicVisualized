@@ -142,19 +142,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Recent Tracks'),
-        automaticallyImplyLeading: false,
-        actions: <Widget>[
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              );
-            },
-          ),
-        ],
+        // automaticallyImplyLeading: false,
       ),
       body: ListView.builder(
         itemCount: _tracks.length,
@@ -162,7 +150,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
           return TrackListTile(track: _tracks[index]);
         },
       ),
-      endDrawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[

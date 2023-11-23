@@ -194,19 +194,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     return Scaffold(
       appBar: AppBar(
         title: Text('Top Scrobbles'),
-        automaticallyImplyLeading: false,
-        actions: <Widget>[
-          Builder(
-            builder: (context) {
-              return IconButton(
-                icon: Icon(Icons.menu),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-              );
-            },
-          ),
-        ],
+        // automaticallyImplyLeading: false,
+
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -225,7 +214,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
           _buildArtistList(_topArtists),
         ],
       ),
-      endDrawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[

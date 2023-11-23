@@ -97,9 +97,10 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
+
       ),
-      endDrawer: Drawer(
+      drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: <Widget>[
