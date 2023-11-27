@@ -86,6 +86,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       setState(() {
         _topTracks = data['toptracks']['track'];
         _showVisualiseDialog();
+
       });
     }
   }
@@ -193,7 +194,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
           ],
         ),
       ),
-      body: SingleChildScrollView(
+      body: Center(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -201,18 +202,38 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: 600,
+                child:Align(
+                  alignment: Alignment.center,
                 child: SfCartesianChart(
-
-                  primaryXAxis: CategoryAxis(),
+                  primaryXAxis: CategoryAxis(
+                    labelStyle: TextStyle(
+                      fontSize: 18,
+                      color: Colors.black,
+                    ),
+                    labelPosition: ChartDataLabelPosition.inside,
+                  ),
                   enableAxisAnimation: true,
                   series: <BarSeries<dynamic, String>>[
                     BarSeries<dynamic, String>(
                       dataSource: _topTracks.cast<Map<String, dynamic>>(),
                       xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
                       yValueMapper: (dynamic tracks, _) => double.tryParse(tracks['playcount'] ?? '0') ?? 0,
-                      dataLabelSettings: DataLabelSettings(isVisible: true),
+                      dataLabelSettings: DataLabelSettings(
+                        isVisible: false,
+                        textStyle: TextStyle(
+                          fontSize: 12, // Set your desired font size
+                        ),
+                      ),
+                      enableTooltip: true, // Enable tooltip for the bar series
                     ),
                   ],
+                  tooltipBehavior: TooltipBehavior(
+                    enable: true,
+                    header: '', // You can customize the header if needed
+                    canShowMarker: false,
+                    format: 'point.y', // You can customize the format of the tooltip content
+                  ),
+                ),
                 ),
               ),
             ],
