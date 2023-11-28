@@ -64,6 +64,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> saveCurrentUser(String username) async {
     final prefs = await SharedPreferences.getInstance();
+    print("OVER HERE:" + username);
     await prefs.setString('username', username);
   }
 

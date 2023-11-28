@@ -82,6 +82,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
 
       final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
       final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
+      print("Last Fm user is: $lastFmUsername");
 
       if (lastFmUsername == null) {
         throw Exception('Last.fm username not found for current user');
@@ -100,7 +101,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
           _showRecentDialog();
         });
       } else {
-        throw Exception('Failed to fetch data: ${response.statusCode}');
+        throw Exception('Failed to fetch data: ${response.statusCode} ${response.body}');
       }
     } catch (e) {
       setState(() {
