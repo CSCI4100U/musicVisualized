@@ -1,15 +1,14 @@
-import 'package:flutter/material.dart'; // for general Flutter widgets and MaterialApp
-import 'package:flutter_dotenv/flutter_dotenv.dart'; // for environment variables
-import 'package:http/http.dart' as http; // for making HTTP requests
-import 'dart:convert'; // for JSON processing
-import 'package:shared_preferences/shared_preferences.dart'; // for local storage
-import 'package:syncfusion_flutter_charts/charts.dart'; // for Syncfusion charts
+import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import '../about_me/about_page.dart';
 import '../utils/db_utils.dart';
-import 'top_scrobbles.dart'; // Ensure you have this page
-import '../recent_tracks.dart'; // Ensure you have this page
-import 'geo_top_tracks.dart'; // Ensure you have this page
-
+import 'top_scrobbles.dart';
+import '../recent_tracks.dart';
+import 'geo_top_tracks.dart';
 
 class VisualizedDataPage extends StatefulWidget {
   @override
@@ -19,13 +18,14 @@ class VisualizedDataPage extends StatefulWidget {
 class _VisualizedDataPageState extends State<VisualizedDataPage> {
   List<dynamic> _topTracks = [];
   bool _isDialogShown = false;
+  ChartType _selectedChartType = ChartType.Bar;
 
   @override
   void initState() {
     super.initState();
     _fetchTopTrackScrobbles();
-
   }
+
   void _showVisualiseDialog() {
     if (!_isDialogShown) {
       showDialog(
@@ -50,7 +50,6 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
   }
 
   void _fetchTopTrackScrobbles() async {
-
     await _fetchTopTracks();
   }
 
@@ -65,13 +64,12 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
 
     final String? currentUser = await getCurrentUser();
     if (currentUser == null) {
-      // Handle the situation where no current user is found.
       return;
     }
 
-    final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
+    final String? lastFmUsername =
+    await _databaseHelper.getLastFmUsername(currentUser);
     if (lastFmUsername == null) {
-      // Handle the situation where no lastfmusername is found for the given user.
       return;
     }
 
@@ -86,20 +84,15 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       setState(() {
         _topTracks = data['toptracks']['track'];
         _showVisualiseDialog();
-
       });
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
-        // automaticallyImplyLeading: false,
-
       ),
       drawer: Drawer(
         child: ListView(
@@ -111,7 +104,8 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
               ),
               child: FutureBuilder<String?>(
                 future: getCurrentUser(),
-                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                builder: (BuildContext context,
+                    AsyncSnapshot<String?> snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasData) {
                       return Text(
@@ -165,7 +159,8 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
+                  MaterialPageRoute(
+                      builder: (context) => MostStreamedTracksPage()),
                 );
               },
             ),
@@ -195,51 +190,115 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
         ),
       ),
       body: Center(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 600,
-                child:Align(
-                  alignment: Alignment.center,
-                child: SfCartesianChart(
-                  primaryXAxis: CategoryAxis(
-                    labelStyle: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black,
-                    ),
-                    labelPosition: ChartDataLabelPosition.inside,
-                  ),
-                  enableAxisAnimation: true,
-                  series: <BarSeries<dynamic, String>>[
-                    BarSeries<dynamic, String>(
-                      dataSource: _topTracks.cast<Map<String, dynamic>>(),
-                      xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
-                      yValueMapper: (dynamic tracks, _) => double.tryParse(tracks['playcount'] ?? '0') ?? 0,
-                      dataLabelSettings: DataLabelSettings(
-                        isVisible: false,
-                        textStyle: TextStyle(
-                          fontSize: 12, // Set your desired font size
-                        ),
-                      ),
-                      enableTooltip: true, // Enable tooltip for the bar series
-                    ),
-                  ],
-                  tooltipBehavior: TooltipBehavior(
-                    enable: true,
-                    header: '', // You can customize the header if needed
-                    canShowMarker: false,
-                    format: 'point.y', // You can customize the format of the tooltip content
-                  ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            DropdownButton<ChartType>(
+              value: _selectedChartType,
+              items: [
+                DropdownMenuItem<ChartType>(
+                  value: ChartType.Bar,
+                  child: Text('Bar Chart'),
                 ),
+                DropdownMenuItem<ChartType>(
+                  value: ChartType.Pie,
+                  child: Text('Pie Chart'),
                 ),
-              ),
-            ],
-          ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedChartType = value!;
+                });
+              },
+            ),
+            Container(
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width,
+              height: 600,
+              child: _selectedChartType == ChartType.Bar
+                  ? _buildBarChart()
+                  : _buildPieChart(),
+            ),
+          ],
         ),
       ),
     );
   }
+
+  Widget _buildBarChart() {
+    return SfCartesianChart(
+      primaryXAxis: CategoryAxis(
+        labelStyle: TextStyle(
+          fontSize: 18,
+          color: Colors.black,
+        ),
+        labelPosition: ChartDataLabelPosition.inside,
+      ),
+      enableAxisAnimation: true,
+      series: <BarSeries<dynamic, String>>[
+        BarSeries<dynamic, String>(
+          dataSource: _topTracks.cast<Map<String, dynamic>>(),
+          xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
+          yValueMapper: (dynamic tracks, _) =>
+          double.tryParse(tracks['playcount'] ?? '0') ?? 0,
+          dataLabelSettings: DataLabelSettings(
+            isVisible: false,
+            textStyle: TextStyle(
+              fontSize: 12,
+            ),
+          ),
+          enableTooltip: true,
+        ),
+      ],
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        header: '',
+        canShowMarker: false,
+        format: 'point.y',
+      ),
+    );
+  }
+
+  Widget _buildPieChart() {
+    return SfCircularChart(
+      series: <CircularSeries<dynamic, String>>[
+        DoughnutSeries<dynamic, String>(
+          dataSource: _topTracks.cast<Map<String, dynamic>>(),
+          xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
+          yValueMapper: (dynamic tracks, _) =>
+          double.tryParse(tracks['playcount'] ?? '0') ?? 0,
+          dataLabelSettings: DataLabelSettings(
+            isVisible: true,
+            connectorLineSettings: ConnectorLineSettings(
+              type: ConnectorType.line,
+              length: '10%', // You can adjust the length as needed
+              width: 2.5, // You can adjust the width as needed
+            ),
+            labelPosition: ChartDataLabelPosition.inside,
+            textStyle: TextStyle(
+              fontSize: 8, // Adjust the font size as needed
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+      ],
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        format: 'point.y',
+      ),
+    );
+  }
+
+
+
 }
+
+
+  enum ChartType {
+  Bar,
+  Pie,
+  }
+
