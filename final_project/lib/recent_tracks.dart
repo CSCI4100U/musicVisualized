@@ -72,6 +72,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
   }
 
   void _fetchRecentTracks() async {
+    print('1');
     try {
       final prefs = await SharedPreferences.getInstance();
       final String? currentUser = prefs.getString('username');
@@ -89,11 +90,16 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
       }
       print("Last Fm user is: $lastFmUsername");
       final String _apiKey = dotenv.get('API_KEY');
+      print("Getting link");
       final response = await http.get(
-        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'),
+          Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=8144424eb171da76b52e51f1f748995a&format=json&limit=10'),
       );
 
+      print(response.body);
+
+      print("kekw");
       if (response.statusCode == 200) {
+        print('did i make it?');
         final data = json.decode(response.body);
         setState(() {
           _tracks = data['recenttracks']['track'];

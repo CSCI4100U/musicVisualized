@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../about_me/about_page.dart';
 import '../utils/db_utils.dart';
@@ -262,43 +263,88 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
   }
 
   Widget _buildPieChart() {
-    return SfCircularChart(
-      series: <CircularSeries<dynamic, String>>[
-        DoughnutSeries<dynamic, String>(
-          dataSource: _topTracks.cast<Map<String, dynamic>>(),
-          xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
-          yValueMapper: (dynamic tracks, _) =>
-          double.tryParse(tracks['playcount'] ?? '0') ?? 0,
-          dataLabelSettings: DataLabelSettings(
-            isVisible: true,
-            connectorLineSettings: ConnectorLineSettings(
-              type: ConnectorType.line,
-              length: '10%', // You can adjust the length as needed
-              width: 2.5, // You can adjust the width as needed
-            ),
-            labelPosition: ChartDataLabelPosition.inside,
-            textStyle: TextStyle(
-              fontSize: 8, // Adjust the font size as needed
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
+    return PieChart(
+      PieChartData(
+        sections: _getSections(),
+        pieTouchData: PieTouchData(
+          touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
+            if (event is FlLongPressEnd) {
+              if (touchResponse != null &&
+                  touchResponse.touchedSection != null) {
+                _showSongDetails(
+                  _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
+                );
+              }
+            }
+          },
         ),
-      ],
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        format: 'point.y',
       ),
     );
   }
 
 
 
+
+  List<PieChartSectionData> _getSections() {
+    double totalPlayCount = _topTracks.fold(0.0, (sum, track) {
+      return sum + (double.tryParse(track['playcount'] ?? '0') ?? 0);
+    });
+
+    return _topTracks
+        .asMap()
+        .entries
+        .map((entry) {
+      final int index = entry.key;
+      final dynamic track = entry.value;
+
+      double value = (double.tryParse(track['playcount'] ?? '0') ?? 0);
+      double percent = (value / totalPlayCount) * 100;
+
+      return PieChartSectionData(
+        color: _getColor(index),
+        value: percent,
+        title: '${percent.toStringAsFixed(2)}%',
+        radius: 60,
+        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+      );
+    }).toList();
+  }
+
+  Color _getColor(int index) {
+    return Colors.accents[index % Colors.accents.length];
+  }
+
+  void _showSongDetails(dynamic track) {
+    // Ensure that the index is within the valid range
+    if (track != null && _topTracks.contains(track)) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Song Details"),
+            content: Column(
+              children: [
+                Text("Name: ${track['name']}"),
+                Text("Play Count: ${track['playcount']}"),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 }
 
 
   enum ChartType {
   Bar,
   Pie,
-  }
-
+}
