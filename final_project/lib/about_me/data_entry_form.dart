@@ -76,15 +76,17 @@ class _DataEntryFormState extends State<DataEntryForm> {
     final String? username = prefs.getString('username');
 
     if (username != null) {
-      final userRef = FirebaseFirestore.instance.collection('users').doc(username);
+      final userRef = FirebaseFirestore.instance.collection('aboutme').doc();
+
       await userRef.set({
+        'username': username.toLowerCase(),
         'name': name,
         'favoriteGenre': favoriteGenre,
         'bio': bio,
         'profilePicUrl': profilePicUrl,
-        'followers': followers,
-        'following': following,
-      }, SetOptions(merge: true));
+        'followers': List<String>.from(followers),
+        'following': List<String>.from(following),
+      });
       if (mounted) {
         Navigator.of(context).pop();
         Navigator.of(context).pushReplacement(
@@ -94,3 +96,5 @@ class _DataEntryFormState extends State<DataEntryForm> {
   }
 
 }
+
+

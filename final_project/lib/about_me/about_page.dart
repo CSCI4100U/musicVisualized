@@ -29,7 +29,7 @@ class _AboutMePageState extends State<AboutMePage> {
 
     if (username != null) {
       FirebaseFirestore.instance.collection('aboutme')
-          .where('username', isEqualTo: username).limit(1).get()
+          .where('username', isEqualTo: username.toLowerCase()).limit(5).get()
           .then((QuerySnapshot snapshot) {
         if (snapshot.docs.isNotEmpty) {
           setState(() {
@@ -273,8 +273,14 @@ class ProfileSearchDelegate extends SearchDelegate {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             var data = docs[index].data() as Map<String, dynamic>;
+            var profilePicUrl = data['profilePicUrl'] ?? 'default_profile_pic_url'; //TO:DO default profile pic
+
             return ListTile(
-              title: Text(data['username']),
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(profilePicUrl),
+                radius: 24,
+              ),
+              title: Text(data['name'] + " (@" + data['username'] + ")"),
               subtitle: Text(data['bio']),
               onTap: () {
                 Navigator.of(context).push(
@@ -289,6 +295,7 @@ class ProfileSearchDelegate extends SearchDelegate {
       },
     );
   }
+
 
 
   @override

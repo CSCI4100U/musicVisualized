@@ -29,6 +29,14 @@ class AboutData {
     );
   }
 
+  void addFollower(String followerName) {
+    followers.add(followerName);
+  }
+
+  void removeFollower(String followerName) {
+    followers.remove(followerName);
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'username': username,
