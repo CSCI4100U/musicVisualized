@@ -8,7 +8,6 @@ import 'package:final_project/utils/fetch_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../about_me/about_page.dart';
 import '../utils/db_utils.dart';
-
 import '../recent_tracks.dart';
 
 class TopScrobblesPage extends StatefulWidget {
@@ -476,5 +475,67 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         );
       },
     );
+  }
+}
+
+Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
+  await dotenv.load();
+  final _apiKey = dotenv.get('API_KEY');
+
+  final url = Uri.parse('http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=$lastFMUsername&api_key=$_apiKey&format=json');
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final topTrack = data['toptracks']['track'][0];
+      final topSong = topTrack['name'];
+      final topArtist = topTrack['artist']['name'];
+      final URL = await fetchTrackImageUrl(topArtist, topSong);
+      print('uwu: ' + URL);
+      return {
+        'topSong': topSong,
+        'topArtist': topArtist,
+        'URL': URL
+      };
+    } else {
+      print('Failed to fetch data: ${response.statusCode}');
+      return {'topSong': 'Unavailable', 'topArtist': 'Unavailable'};
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+    return {'topSong': 'Error', 'topArtist': 'Error'};
+  }
+}
+
+Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
+  await dotenv.load();
+
+  final _apiKey = dotenv.env['API_KEY'];
+
+  final url = Uri.parse('http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=$lastFMUsername&api_key=$_apiKey&format=json');
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      final topArtistData = data['topartists']['artist'][0];
+      final topArtist = topArtistData['name'];
+      final URL = await fetchArtistImageUrl(topArtist);
+
+      return {
+        'topArtist': topArtist,
+        'URL': URL
+      };
+    } else {
+      print('Failed to fetch data: ${response.statusCode}');
+      return {'topArtist': 'Unavailable'};
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+    return {'topArtist': 'Error'};
   }
 }

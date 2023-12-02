@@ -12,6 +12,10 @@ import 'track_tile.dart';
 import '../utils/db_utils.dart';
 
 class RecentTracksPage extends StatefulWidget {
+  final String? lastFmUsername;
+
+  RecentTracksPage({Key? key, this.lastFmUsername}) : super(key: key);
+
   @override
   _RecentTracksPageState createState() => _RecentTracksPageState();
 }
@@ -25,8 +29,9 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
   @override
   void initState() {
     super.initState();
-    _fetchRecentTracks();
+    _fetchRecentTracks(lastFmUsername: widget.lastFmUsername);
   }
+
   void _showRecentDialog() {
     showDialog(
       context: context,
@@ -71,30 +76,30 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     }
   }
 
-  void _fetchRecentTracks() async {
+  void _fetchRecentTracks({String? lastFmUsername}) async {
     print('1');
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? currentUser = prefs.getString('username');
-
-      if (currentUser == null) {
-        throw Exception('No current user found');
-      }
-
-      final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
-      final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
-      print("Last Fm user is: $lastFmUsername");
-
       if (lastFmUsername == null) {
-        throw Exception('Last.fm username not found for current user');
+        final prefs = await SharedPreferences.getInstance();
+        final String? currentUser = prefs.getString('username');
+
+        if (currentUser == null) {
+          throw Exception('No current user found');
+        }
+
+        final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+        lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
+
+        if (lastFmUsername == null) {
+          throw Exception('Last.fm username not found for current user');
+        }
       }
+
       print("Last Fm user is: $lastFmUsername");
-      final String _apiKey = dotenv.get('API_KEY');
       print("Getting link");
       final response = await http.get(
-          Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=8144424eb171da76b52e51f1f748995a&format=json&limit=10'),
+        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=8144424eb171da76b52e51f1f748995a&format=json&limit=10'),
       );
-
       print(response.body);
 
       print("kekw");

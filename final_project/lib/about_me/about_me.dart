@@ -4,6 +4,7 @@ class AboutData {
   String favoriteGenre;
   String bio;
   String profilePicUrl;
+  String lastFMUsername;
   List<String> following;
   List<String> followers;
 
@@ -13,6 +14,7 @@ class AboutData {
     required this.favoriteGenre,
     required this.bio,
     required this.profilePicUrl,
+    required this.lastFMUsername,
     required this.following,
     required this.followers,
   });
@@ -24,6 +26,7 @@ class AboutData {
       favoriteGenre: data['favoriteGenre'],
       bio: data['bio'],
       profilePicUrl: data['profilePicUrl'],
+      lastFMUsername: data['lastFMUsername'],
       following: List<String>.from(data['following'] ?? []),
       followers: List<String>.from(data['followers'] ?? []),
     );
@@ -41,6 +44,7 @@ class AboutData {
     return {
       'username': username,
       'name': name,
+      'lastFMUsername': lastFMUsername,
       'favoriteGenre': favoriteGenre,
       'bio': bio,
       'profilePicUrl': profilePicUrl,

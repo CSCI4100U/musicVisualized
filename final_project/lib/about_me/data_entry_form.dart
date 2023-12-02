@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project/utils/db_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -77,6 +78,9 @@ class _DataEntryFormState extends State<DataEntryForm> {
 
     if (username != null) {
       final userRef = FirebaseFirestore.instance.collection('aboutme').doc();
+      final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+
+      final String? lastFmUsername = await _databaseHelper.getLastFmUsername(username);
 
       await userRef.set({
         'username': username.toLowerCase(),
@@ -86,6 +90,7 @@ class _DataEntryFormState extends State<DataEntryForm> {
         'profilePicUrl': profilePicUrl,
         'followers': List<String>.from(followers),
         'following': List<String>.from(following),
+        'lastFMUsername': lastFmUsername,
       });
       if (mounted) {
         Navigator.of(context).pop();

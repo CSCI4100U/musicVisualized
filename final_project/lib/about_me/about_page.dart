@@ -45,7 +45,6 @@ class _AboutMePageState extends State<AboutMePage> {
     }
   }
 
-
   void _promptForDataEntry() {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => DataEntryForm()));
@@ -65,7 +64,6 @@ class _AboutMePageState extends State<AboutMePage> {
         title: Text('About Me'),
         backgroundColor: Colors.deepPurple,
         elevation: 0,
-        // automaticallyImplyLeading: false,
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
@@ -84,6 +82,7 @@ class _AboutMePageState extends State<AboutMePage> {
       drawer: _buildDrawer(),
     );
   }
+
 
   Widget _buildDrawer() {
     return Drawer(
@@ -135,6 +134,7 @@ class _AboutMePageState extends State<AboutMePage> {
           ListTile(
             leading: Icon(Icons.history),
             title: Text('Recent Tracks'),
+
             onTap: () {
               Navigator.pop(context);
               Navigator.pushReplacement(
@@ -184,52 +184,64 @@ class _AboutMePageState extends State<AboutMePage> {
 
   Widget _buildProfileView() {
     return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 40),
-            CircleAvatar(
-              backgroundImage: NetworkImage(aboutData!.profilePicUrl),
-              radius: 60,
-              backgroundColor: Colors.deepPurple.shade50,
+      child: Column(
+        children: [
+          _TopGradientSection(userData: aboutData!),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  aboutData!.name,
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  aboutData!.favoriteGenre,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                SizedBox(height: 5),
+                Text(aboutData!.bio),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildInfoCard('Followers: ${aboutData!.followers.length}'),
+                    _buildInfoCard('Following: ${aboutData!.following.length}'),
+                  ],
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            Text(
-              aboutData!.name,
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-            ),
-            SizedBox(height: 15),
-            _buildInfoCard('Favorite Genre: ${aboutData!.favoriteGenre}'),
-            _buildInfoCard('Bio: ${aboutData!.bio}'),
-            _buildInfoCard('Followers: ${aboutData!.followers.length}'),
-            _buildInfoCard('Following: ${aboutData!.following.length}'),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildInfoCard(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple.shade50,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 18),
-        textAlign: TextAlign.center,
+    return Expanded(
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.deepPurple.shade50,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 18),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
+
+
+
 }
 class ProfileSearchDelegate extends SearchDelegate {
   @override
@@ -301,6 +313,21 @@ class ProfileSearchDelegate extends SearchDelegate {
   @override
   Widget buildSuggestions(BuildContext context) {
     return Container();
+  }
+}
+class _TopGradientSection extends StatelessWidget {
+  final AboutData userData;
+
+  _TopGradientSection({required this.userData});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CircleAvatar(
+        radius: 60,
+        backgroundImage: NetworkImage(userData.profilePicUrl),
+      ),
+    );
   }
 }
 

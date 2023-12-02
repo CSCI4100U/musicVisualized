@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project/recent_tracks.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'about_me.dart';
+import '../top_data/top_scrobbles.dart';
 
 class UserProfilePage extends StatefulWidget {
   final AboutData userData;
@@ -14,11 +16,34 @@ class UserProfilePage extends StatefulWidget {
 
 class _UserProfilePageState extends State<UserProfilePage> {
   bool isFollowing = false;
+  String topSong = '';
+  String imgSong = '';
+  String topArtist = '';
+  String imgArtist = '';
 
   @override
   void initState() {
     super.initState();
     _checkIfFollowing();
+    fetchTopSongData();
+    fetchArtistSongData();
+  }
+
+  void fetchTopSongData() async {
+    final topData = await fetchTopSong(widget.userData.lastFMUsername);
+    setState(() {
+      print(topData['URL']);
+      topSong = (topData['topSong'] ?? '') + " - " + (topData['topArtist'] ?? '');
+      imgSong = topData['URL'] ?? '';
+    });
+  }
+
+  void fetchArtistSongData() async {
+    final topData = await fetchTopArtist(widget.userData.lastFMUsername);
+    setState(() {
+      topArtist = topData['topArtist'] ?? '';
+      imgArtist = topData['URL'] ?? '';
+    });
   }
 
   Future<void> _checkIfFollowing() async {
@@ -150,6 +175,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
         child: Column(
           children: [
             _TopGradientSection(userData: widget.userData),
+            //String topArtist = fetchTopArtist(widget.userData.lastFMUsername);
+            //String topSong = fetchTopSong(widget.userData.lastFMUsername);
+
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -180,10 +208,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildActionButton(Icons.person_add_alt_1, context),
+                      _buildFollowButton(Icons.person_add_alt_1, context),
                       const SizedBox(width: 16),
+                      _buildStatButton(Icons.music_note, context),
                     ],
                   ),
+
+                  if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
+                  if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
                 ],
               ),
             ),
@@ -192,8 +224,85 @@ class _UserProfilePageState extends State<UserProfilePage> {
       ),
     );
   }
+  Widget _buildDetailTile(String title, String detail, String imageUrl) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.shade50,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          imageUrl.isNotEmpty
+              ? ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: Image.network(
+              imageUrl,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+            ),
+          )
+              : Icon(Icons.person, color: Colors.deepPurple, size: 30),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  detail,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  Widget _buildActionButton(IconData icon, BuildContext context, {Color backgroundColor = Colors.deepPurple}) {
+
+
+
+  Widget _buildStatButton(IconData icon, BuildContext context, {Color backgroundColor = Colors.red}) {
+    return FloatingActionButton.extended(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RecentTracksPage(lastFmUsername: widget.userData.lastFMUsername)),
+        );
+      },
+      elevation: 0,
+      backgroundColor: backgroundColor,
+      icon: Icon(Icons.message),
+      label: Text('Recent Tracks'),
+    );
+  }
+
+  Widget _buildFollowButton (IconData icon, BuildContext context, {Color backgroundColor = Colors.deepPurple}) {
     String label = isFollowing ? 'Unfollow' : 'Follow';
     return FloatingActionButton.extended(
       onPressed: () {
