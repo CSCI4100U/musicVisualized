@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project/recent_tracks.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'about_me.dart';
 import '../top_data/top_scrobbles.dart';
+import 'package:http/http.dart' as http;
+
 
 class UserProfilePage extends StatefulWidget {
   final AboutData userData;
@@ -22,14 +28,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
   String imgArtist = '';
   String topAlbum = '';
   String imgAlbum = '';
+  int totalScrobbles = 0;
+
 
   @override
   void initState() {
     super.initState();
+    _fetchData();
     _checkIfFollowing();
     fetchTopSongData();
     fetchArtistSongData();
     fetchTopAlbumData();
+
+  }
+
+  void _fetchData() async {
+    int scrobbles = await fetchTotalScrobbles(widget.userData.lastFMUsername);
+    setState(() {
+      totalScrobbles = scrobbles;
+    });
   }
 
   void fetchTopSongData() async {
@@ -203,7 +220,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    widget.userData.favoriteGenre,
+                    "Favourite Genre: " + widget.userData.favoriteGenre,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const SizedBox(height: 5),
@@ -225,7 +242,9 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       _buildStatButton(Icons.music_note, context),
                     ],
                   ),
+                  const SizedBox(height: 10),
 
+                  _buildInfoCard('Scrobbles: $totalScrobbles'),
                   if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
                   if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
                   if (topArtist.isNotEmpty) _buildDetailTile('Top Album', topAlbum, imgAlbum),
@@ -310,7 +329,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       },
       elevation: 0,
       backgroundColor: backgroundColor,
-      icon: Icon(Icons.message),
+      icon: Icon(Icons.music_note),
       label: Text('Recent Tracks'),
     );
   }
@@ -367,3 +386,22 @@ class _TopGradientSection extends StatelessWidget {
   }
 
 }
+
+Future<int> fetchTotalScrobbles(String lastFMUsername) async {
+  final _apiKey = dotenv.env['API_KEY'];
+  final url = Uri.parse('http://ws.audioscrobbler.com/2.0/?method=user.getInfo&user=$lastFMUsername&api_key=$_apiKey&format=json');
+
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final scrobbles = int.parse(data['user']['playcount']);
+      return scrobbles;
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+  }
+  return 0; // Return 0 in case of an error
+}
+
+
