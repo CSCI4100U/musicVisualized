@@ -20,6 +20,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   String imgSong = '';
   String topArtist = '';
   String imgArtist = '';
+  String topAlbum = '';
+  String imgAlbum = '';
 
   @override
   void initState() {
@@ -27,6 +29,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     _checkIfFollowing();
     fetchTopSongData();
     fetchArtistSongData();
+    fetchTopAlbumData();
   }
 
   void fetchTopSongData() async {
@@ -43,6 +46,15 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       topArtist = topData['topArtist'] ?? '';
       imgArtist = topData['URL'] ?? '';
+    });
+  }
+
+  void fetchTopAlbumData() async {
+    final topData = await fetchTopAlbum(widget.userData.lastFMUsername);
+    setState(() {
+      print(topData['URL']);
+      topAlbum = (topData['topAlbum'] ?? '') + " - " + (topData['topArtist'] ?? '');
+      imgAlbum = topData['URL'] ?? '';
     });
   }
 
@@ -179,7 +191,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
             //String topSong = fetchTopSong(widget.userData.lastFMUsername);
 
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(0.0),
               child: Column(
                 children: [
                   Text(
@@ -216,6 +228,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
                   if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
                   if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
+                  if (topArtist.isNotEmpty) _buildDetailTile('Top Album', topAlbum, imgAlbum),
                 ],
               ),
             ),
@@ -343,10 +356,14 @@ class _TopGradientSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: CircleAvatar(
-        radius: 60,
-        backgroundImage: NetworkImage(userData.profilePicUrl),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 16),
+        child: CircleAvatar(
+          radius: 60,
+          backgroundImage: NetworkImage(userData.profilePicUrl),
+        ),
       ),
     );
   }
+
 }

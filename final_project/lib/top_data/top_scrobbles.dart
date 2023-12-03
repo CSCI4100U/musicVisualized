@@ -539,3 +539,37 @@ Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
     return {'topArtist': 'Error'};
   }
 }
+
+Future<Map<String, String>> fetchTopAlbum(String lastFMUsername) async {
+  await dotenv.load();
+
+  final _apiKey = dotenv.env['API_KEY'];
+
+  final url = Uri.parse('http://ws.audioscrobbler.com/2.0/?method=user.gettopalbums&user=$lastFMUsername&api_key=$_apiKey&format=json');
+
+  try {
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      final topAlbumData = data['topalbums']['album'][0];
+      final topAlbum = topAlbumData['name'];
+      final topArtist = topAlbumData['artist']['name'];
+      final URL = await fetchAlbumImageUrl(topArtist, topAlbum);
+
+      return {
+        'topAlbum': topAlbum,
+        'topArtist': topArtist,
+        'URL': URL
+      };
+    } else {
+      print('Failed to fetch data: ${response.statusCode}');
+      return {'topAlbum': 'Unavailable', 'URL': ''};
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+    return {'topAlbum': 'Error', 'URL': ''};
+  }
+}
+
