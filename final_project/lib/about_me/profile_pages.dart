@@ -28,6 +28,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
   String imgArtist = '';
   String topAlbum = '';
   String imgAlbum = '';
+  String lastSong = '';
+  String imgLast = '';
   int totalScrobbles = 0;
 
 
@@ -39,7 +41,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     fetchTopSongData();
     fetchArtistSongData();
     fetchTopAlbumData();
-
+    fetchLastTrackData();
   }
 
   void _fetchData() async {
@@ -54,15 +56,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       print(topData['URL']);
       topSong = (topData['topSong'] ?? '') + " - " + (topData['topArtist'] ?? '');
-      imgSong = topData['URL'] ?? '';
+      imgSong = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
     });
+  }
+
+  void fetchLastTrackData() async {
+    final topData = await fetchLastTrack(widget.userData.lastFMUsername);
+    setState(() {
+      print(topData['URL']);
+      lastSong = (topData['track'] ?? '') + " - " + (topData['artist'] ?? '');
+      imgLast = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+    });
+
   }
 
   void fetchArtistSongData() async {
     final topData = await fetchTopArtist(widget.userData.lastFMUsername);
     setState(() {
       topArtist = topData['topArtist'] ?? '';
-      imgArtist = topData['URL'] ?? '';
+      imgArtist = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
     });
   }
 
@@ -71,7 +83,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     setState(() {
       print(topData['URL']);
       topAlbum = (topData['topAlbum'] ?? '') + " - " + (topData['topArtist'] ?? '');
-      imgAlbum = topData['URL'] ?? '';
+      imgAlbum = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
     });
   }
 
@@ -211,13 +223,23 @@ class _UserProfilePageState extends State<UserProfilePage> {
               padding: const EdgeInsets.all(0.0),
               child: Column(
                 children: [
-                  Text(
-                    widget.userData.name,
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline6
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: widget.userData.name,
+                          style: Theme.of(context).textTheme.headline6?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text: " (@" + widget.userData.username + ")",
+                          style: Theme.of(context).textTheme.headline6?.copyWith(
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+
                   const SizedBox(height: 10),
                   Text(
                     "Favourite Genre: " + widget.userData.favoriteGenre,
@@ -248,6 +270,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
                   if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
                   if (topArtist.isNotEmpty) _buildDetailTile('Top Album', topAlbum, imgAlbum),
+                  if (topArtist.isNotEmpty) _buildDetailTile('Recently Played', lastSong, imgLast),
                 ],
               ),
             ),
@@ -257,63 +280,89 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
   }
   Widget _buildDetailTile(String title, String detail, String imageUrl) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple.shade50,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: Offset(0, 3),
+    return GestureDetector(
+        onTap: () {
+          if (title == "Top Song") {
+            print(widget.userData.lastFMUsername);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage(lastFmUsername: widget.userData.lastFMUsername, initialTabIndex: 0)),
+            );
+
+          } else if (title == "Top Artist") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage(lastFmUsername: widget.userData.lastFMUsername, initialTabIndex: 1)),
+            );
+          } else if (title == "Top Album") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage(lastFmUsername: widget.userData.lastFMUsername, initialTabIndex: 2)),
+            );
+          } else if(title == "Recently Played") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RecentTracksPage(lastFmUsername: widget.userData.lastFMUsername)),
+            );
+          }
+        },
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade50,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          imageUrl.isNotEmpty
-              ? ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: Image.network(
-              imageUrl,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
-            ),
-          )
-              : Icon(Icons.person, color: Colors.deepPurple, size: 30),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.deepPurple,
-                  ),
+          child: Row(
+            children: [
+              imageUrl.isNotEmpty
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.network(
+                  imageUrl,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
                 ),
-                SizedBox(height: 8),
-                Text(
-                  detail,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              )
+                  : Icon(Icons.person, color: Colors.deepPurple, size: 30),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      detail,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        ));
   }
 
 
@@ -401,7 +450,7 @@ Future<int> fetchTotalScrobbles(String lastFMUsername) async {
   } catch (e) {
     print('Error occurred: $e');
   }
-  return 0; // Return 0 in case of an error
+  return 0;
 }
 
 

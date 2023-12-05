@@ -8,6 +8,7 @@ class AboutData {
   List<String> following;
   List<String> followers;
 
+
   AboutData({
     required this.username,
     required this.name,

@@ -11,6 +11,11 @@ import '../utils/db_utils.dart';
 import '../recent_tracks.dart';
 
 class TopScrobblesPage extends StatefulWidget {
+  final String? lastFmUsername;
+  final int initialTabIndex;
+
+  TopScrobblesPage({Key? key, this.lastFmUsername, this.initialTabIndex = 0}) : super(key: key);
+
   @override
   _TopScrobblesPageState createState() => _TopScrobblesPageState();
 }
@@ -25,8 +30,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(vsync: this, length: 3);
-    _fetchData();
+    _tabController = TabController(vsync: this, length: 3, initialIndex: widget.initialTabIndex);
+    _fetchData(lastFmUsername: widget.lastFmUsername);
   }
   void _showScrobbleDialog() {
     if (!_isDialogShown) {
@@ -76,29 +81,21 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     return prefs.getString('username');
   }
 
-  void _fetchData() async {
-    await _fetchTopTracks();
-    await _fetchTopAlbums();
-    await _fetchTopArtists();
+  void _fetchData({String? lastFmUsername}) async {
+    await _fetchTopTracks(lastFmUsername);
+    await _fetchTopAlbums(lastFmUsername);
+    await _fetchTopArtists(lastFmUsername);
   }
 
-  Future<void> _fetchTopArtists() async {
+  Future<void> _fetchTopArtists(String? username) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? currentUser = prefs.getString('username');
-
-      if (currentUser == null) {
-        throw Exception('No current user found');
-      }
-
-      final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
-      final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
+      final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
+      final String _apiKey = dotenv.get('API_KEY');
 
       if (lastFmUsername == null) {
-        throw Exception('Last.fm username not found for current user');
+        throw Exception('Last.fm username not found');
       }
 
-      final String _apiKey = dotenv.get('API_KEY');
       final response = await http.get(
         Uri.parse(
             'https://ws.audioscrobbler.com/2.0/?method=user.getTopArtists&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'
@@ -110,29 +107,25 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         setState(() {
           _topArtists = data['topartists']['artist'];
         });
-        _showScrobbleDialog();
       } else {
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
+      // Handle exceptions
     }
   }
 
-  Future<void> _fetchTopAlbums() async {
+
+  Future<void> _fetchTopAlbums(String? username) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? currentUser = prefs.getString('username');
-      if (currentUser == null) {
-        throw Exception('No current user found');
-      }
 
-      final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
-      final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
-      if (lastFmUsername == null) {
-        throw Exception('Last.fm username not found for current user');
-      }
-
+      final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
       final String _apiKey = dotenv.get('API_KEY');
+
+      if (lastFmUsername == null) {
+        throw Exception('Last.fm username not found');
+      }
+
       final response = await http.get(
         Uri.parse(
             'https://ws.audioscrobbler.com/2.0/?method=user.getTopAlbums&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'
@@ -148,25 +141,20 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
-
+      // Handle exceptions
     }
   }
 
-  Future<void> _fetchTopTracks() async {
+
+  Future<void> _fetchTopTracks(String? username) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final String? currentUser = prefs.getString('username');
-      if (currentUser == null) {
-        throw Exception('No current user found');
-      }
-
-      final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
-      final String? lastFmUsername = await _databaseHelper.getLastFmUsername(currentUser);
-      if (lastFmUsername == null) {
-        throw Exception('Last.fm username not found for current user');
-      }
-
+      final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
       final String _apiKey = dotenv.get('API_KEY');
+
+      if (lastFmUsername == null) {
+        throw Exception('Last.fm username not found');
+      }
+
       final response = await http.get(
         Uri.parse(
             'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'
@@ -182,9 +170,21 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
         throw Exception('Failed to fetch data: ${response.statusCode}');
       }
     } catch (e) {
-
+      // Handle the exception
+      print("Error fetching top tracks: $e");
     }
   }
+
+  Future<String?> _getDefaultLastFmUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? currentUser = prefs.getString('username');
+    if (currentUser == null) {
+      return null;
+    }
+    final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+    return _databaseHelper.getLastFmUsername(currentUser);
+  }
+
 
 
 
@@ -481,7 +481,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
   await dotenv.load();
   final _apiKey = dotenv.get('API_KEY');
-
+  print("I'M IN WOO " + lastFMUsername);
   final url = Uri.parse('http://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=$lastFMUsername&api_key=$_apiKey&format=json');
 
   try {
@@ -537,6 +537,35 @@ Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
   } catch (e) {
     print('Error occurred: $e');
     return {'topArtist': 'Error'};
+  }
+}
+
+Future<Map<String, String>> fetchLastTrack(String lastFMUsername) async {
+  final _apiKey = dotenv.env['API_KEY'];
+  final url = Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFMUsername&api_key=1143c67892136c7d9318ebca82881c8c&format=json&limit=1');
+
+  //Return the last song the user listened to
+  try {
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      //Parse the song name and artist name
+      final song = data['recenttracks']['track'][0]['name'];
+      final artist = data['recenttracks']['track'][0]['artist']['#text'];
+      final imageUrl = await fetchTrackImageUrl(artist, song);
+
+      return {
+        'track': song,
+        'artist': artist,
+        'URL': imageUrl
+      };
+
+    } else {
+      throw Exception('Failed to fetch data: ${response.statusCode} ${response.body}');
+    }
+  } catch (e) {
+    print('Error occurred: $e');
+    return {'track': 'Unavailable'};
   }
 }
 

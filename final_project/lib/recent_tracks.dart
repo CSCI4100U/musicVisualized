@@ -3,6 +3,7 @@ import 'package:final_project/account/user.dart';
 import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
 import 'package:final_project/top_data/top_visulized_data.dart';
+import 'package:final_project/utils/fetch_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -128,6 +129,8 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     return prefs.getString('username');
 
   }
+
+
 
   @override
   Widget build(BuildContext context) {

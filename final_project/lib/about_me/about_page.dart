@@ -6,21 +6,38 @@ import '../recent_tracks.dart';
 import '../top_data/geo_top_tracks.dart';
 import '../top_data/top_scrobbles.dart';
 import '../top_data/top_visulized_data.dart';
+import '../utils/db_utils.dart';
 import 'about_me.dart';
 import 'data_entry_form.dart';
 
 class AboutMePage extends StatefulWidget {
   @override
   _AboutMePageState createState() => _AboutMePageState();
+
 }
 
 class _AboutMePageState extends State<AboutMePage> {
   AboutData? aboutData;
+  String topSong = '';
+  String imgSong = '';
+  String topArtist = '';
+  String imgArtist = '';
+  String topAlbum = '';
+  String imgAlbum = '';
+  String lastSong = '';
+  String imgLast = '';
+  int totalScrobbles = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
+    _fetchData();
+    fetchTopSongData();
+    fetchArtistSongData();
+    fetchTopAlbumData();
+    fetchLastTrackData();
+
   }
 
   Future<void> _fetchUserData() async {
@@ -45,6 +62,53 @@ class _AboutMePageState extends State<AboutMePage> {
     }
   }
 
+
+  Future<void> _fetchData() async {
+    int scrobbles = await fetchTotalScrobbles(aboutData!.lastFMUsername);
+    setState(() {
+      totalScrobbles = scrobbles;
+    });
+  }
+
+  void fetchTopSongData() async {
+    final topData = await fetchTopSong(aboutData!.lastFMUsername);
+    setState(() {
+      print(topData['URL']);
+      topSong = (topData['topSong'] ?? '') + " - " + (topData['topArtist'] ?? '');
+      imgSong = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+    });
+  }
+
+  void fetchLastTrackData() async {
+    final topData = await fetchLastTrack(aboutData!.lastFMUsername);
+    setState(() {
+      print(topData['URL']);
+      lastSong = (topData['track'] ?? '') + " - " + (topData['artist'] ?? '');
+      imgLast = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+    });
+
+  }
+
+  void fetchArtistSongData() async {
+    final topData = await fetchTopArtist(aboutData!.lastFMUsername);
+    setState(() {
+      topArtist = topData['topArtist'] ?? '';
+      imgArtist = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+    });
+  }
+
+  void fetchTopAlbumData() async {
+    print(aboutData!.lastFMUsername);
+    final topData = await fetchTopAlbum(aboutData!.lastFMUsername);
+    setState(() {
+      print(topData['URL']);
+      topAlbum = (topData['topAlbum'] ?? '') + " - " + (topData['topArtist'] ?? '');
+      imgAlbum = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+    });
+  }
+
+
+
   void _promptForDataEntry() {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => DataEntryForm()));
@@ -55,6 +119,66 @@ class _AboutMePageState extends State<AboutMePage> {
 
     return prefs.getString('username');
 
+  }
+
+  Widget _buildDetailTile(String title, String detail, String imageUrl) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.shade50,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          imageUrl.isNotEmpty
+              ? ClipRRect(
+            borderRadius: BorderRadius.circular(5),
+            child: Image.network(
+              imageUrl,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+            ),
+          )
+              : Icon(Icons.person, color: Colors.deepPurple, size: 30),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.deepPurple,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  detail,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -212,11 +336,16 @@ class _AboutMePageState extends State<AboutMePage> {
                   children: [
                     _buildInfoCard('Followers: ${aboutData!.followers.length}'),
                     _buildInfoCard('Following: ${aboutData!.following.length}'),
+
                   ],
                 ),
               ],
             ),
           ),
+          if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
+          if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
+          if (topArtist.isNotEmpty) _buildDetailTile('Top Album', topAlbum, imgAlbum),
+          if (topArtist.isNotEmpty) _buildDetailTile('Recently Played', lastSong, imgLast),
         ],
       ),
     );
@@ -285,7 +414,7 @@ class ProfileSearchDelegate extends SearchDelegate {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             var data = docs[index].data() as Map<String, dynamic>;
-            var profilePicUrl = data['profilePicUrl'] ?? 'default_profile_pic_url'; //TO:DO default profile pic
+            var profilePicUrl = data['profilePicUrl'] ?? 'https://lastfm.freetls.fastly.net/i/u/avatar170s/818148bf682d429dc215c1705eb27b98.png'; //TO:DO default profile pic
 
             return ListTile(
               leading: CircleAvatar(
