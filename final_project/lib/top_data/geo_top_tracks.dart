@@ -51,14 +51,16 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
     }
 
     Position position = await Geolocator.getCurrentPosition();
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(position.latitude, position.longitude);
     return placemarks.first.country;
   }
 
   Future<List<dynamic>> fetchTopTracks(String country) async {
     final apiKey = dotenv.get('API_KEY');
     final response = await http.get(
-      Uri.parse('http://ws.audioscrobbler.com/2.0/?method=geo.getTopTracks&country=$country&api_key=$apiKey&format=json'),
+      Uri.parse(
+          'http://ws.audioscrobbler.com/2.0/?method=geo.getTopTracks&country=$country&api_key=$apiKey&format=json'),
     );
 
     if (response.statusCode == 200) {
@@ -117,10 +119,31 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
         itemCount: _tracks.length,
         itemBuilder: (context, index) {
           var track = _tracks[index];
-          return ListTile(
-            title: Text(track['name']),
-            subtitle: Text(track['artist']['name']),
-            leading: Image.network(track['image'][0]['#text']),
+          return Container(
+            margin: EdgeInsets.all(8.0),
+            padding: EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black),
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: ListTile(
+              title: Text(
+                track['name'],
+                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(track['artist']['name']),
+              leading: Container(
+                width: 80.0,
+                height: 80.0,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    track['image'][0]['#text'],
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
           );
         },
       ),
