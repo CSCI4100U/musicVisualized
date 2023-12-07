@@ -35,7 +35,6 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
     });
   }
 
-  // Determine the current country of the user
   Future<String?> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -63,7 +62,6 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
     return placemarks.first.country;
   }
 
-  // Fetches the top tracks for a given country
   Future<List<dynamic>> fetchTopTracks(String country) async {
     final apiKey = dotenv.get('API_KEY');
     final response = await http.get(
@@ -72,15 +70,13 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
     );
 
     if (response.statusCode == 200) {
-      var decodedBody = utf8.decode(response.bodyBytes);
-      final data = json.decode(decodedBody);
+      final data = json.decode(response.body);
       return data['tracks']['track'];
     } else {
       throw Exception('Failed to load top tracks');
     }
   }
 
-  // Fetches the image URL for a given track
   Future<String> fetchTrackImageUrl(String artist, String track) async {
     await dotenv.load();
     final accessToken = await getSpotifyAccessToken();
