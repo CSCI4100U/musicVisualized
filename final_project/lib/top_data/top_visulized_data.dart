@@ -1,3 +1,4 @@
+import 'package:final_project/about_me/profile_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -11,6 +12,7 @@ import '../utils/db_utils.dart';
 import 'top_scrobbles.dart';
 import '../recent_tracks.dart';
 import 'geo_top_tracks.dart';
+import '../utils/fetch_image.dart';
 
 class VisualizedDataPage extends StatefulWidget {
   @override
@@ -21,6 +23,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
   List<dynamic> _topTracks = [];
   bool _isDialogShown = false;
   ChartType _selectedChartType = ChartType.Bar;
+
 
   @override
   void initState() {
@@ -86,133 +89,10 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       setState(() {
         _topTracks = data['toptracks']['track'];
         _showVisualiseDialog();
+
       });
     }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Visualized Data'),
-        backgroundColor: Colors.black87,
-      ),
-      drawer: AppDrawer(
-        getCurrentUser: () async {
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getString('username');
-        },
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            DropdownButton<ChartType>(
-              value: _selectedChartType,
-              items: [
-                DropdownMenuItem<ChartType>(
-                  value: ChartType.Bar,
-                  child: Text('Bar Chart'),
-                ),
-                DropdownMenuItem<ChartType>(
-                  value: ChartType.Pie,
-                  child: Text('Pie Chart'),
-                ),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedChartType = value!;
-                });
-              },
-            ),
-            Container(
-              width: MediaQuery
-                  .of(context)
-                  .size
-                  .width,
-              height: 600,
-              child: _selectedChartType == ChartType.Bar
-                  ? _buildBarChart()
-                  : _buildPieChart(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBarChart() {
-    // Sort _topTracks in ascending order based on 'playcount'
-    _topTracks.sort((a, b) {
-      double playcountA = double.tryParse(a['playcount'] ?? '0') ?? 0;
-      double playcountB = double.tryParse(b['playcount'] ?? '0') ?? 0;
-      return playcountA.compareTo(playcountB);
-    });
-
-    // Calculate the total scrobble count
-    double totalScrobbles = _topTracks
-        .map((track) => double.tryParse(track['playcount'] ?? '0') ?? 0)
-        .fold(0, (acc, playcount) => acc + playcount);
-
-    return SfCartesianChart(
-      primaryXAxis: CategoryAxis(
-        labelStyle: TextStyle(
-          fontSize: 18,
-          color: Colors.black,
-        ),
-        labelPosition: ChartDataLabelPosition.inside,
-      ),
-      enableAxisAnimation: true,
-      series: <BarSeries<dynamic, String>>[
-        BarSeries<dynamic, String>(
-          dataSource: _topTracks.cast<Map<String, dynamic>>(),
-          xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
-          yValueMapper: (dynamic tracks, _) =>
-          double.tryParse(tracks['playcount'] ?? '0') ?? 0,
-          pointColorMapper: (dynamic tracks, _) =>
-          _topTracks.indexOf(tracks) % 2 == 0
-              ? Colors.grey
-              : Colors.orange,
-          dataLabelSettings: DataLabelSettings(
-            isVisible: false,
-            textStyle: TextStyle(
-              fontSize: 12,
-            ),
-          ),
-          enableTooltip: true,
-        ),
-      ],
-      tooltipBehavior: TooltipBehavior(
-        enable: true,
-        header: '',
-        canShowMarker: false,
-        format: 'Name: point.x\nPlaycount: point.y\nTotal Scrobbles: $totalScrobbles',
-      ),
-    );
-  }
-
-  Widget _buildPieChart() {
-    return PieChart(
-      PieChartData(
-        sections: _getSections(),
-        pieTouchData: PieTouchData(
-          touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
-            if (event is FlLongPressEnd) {
-              if (touchResponse != null &&
-                  touchResponse.touchedSection != null) {
-                _showSongDetails(
-                  _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
-                );
-              }
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-
-
 
   List<PieChartSectionData> _getSections() {
     double totalPlayCount = _topTracks.fold(0.0, (sum, track) {
@@ -235,41 +115,218 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
         title: '${percent.toStringAsFixed(2)}%',
         radius: 60,
         titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        showTitle: true,
       );
-    }).toList();
+    })
+        .toList();
   }
+
+
+  Future<String> getSongWithMostScrobbles() async {
+    if (_topTracks.isEmpty) {
+      return 'No songs available';
+    }
+
+    // Sort the tracks in descending order based on playcount
+    _topTracks.sort((a, b) {
+      double playcountA = double.tryParse(a['playcount'] ?? '0') ?? 0;
+      double playcountB = double.tryParse(b['playcount'] ?? '0') ?? 0;
+      return playcountB.compareTo(playcountA);
+    });
+
+    // Get the first track (the one with the most scrobbles)
+    Map<String, dynamic> mostScrobbledTrack = _topTracks.first;
+
+    // Extract the name of the most scrobbled track
+    String mostScrobbledTrackName = mostScrobbledTrack['name'].toString();
+
+    return mostScrobbledTrackName;
+  }
+
+
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Visualized Data'),
+        backgroundColor: Colors.black87,
+      ),
+      drawer: AppDrawer(
+        getCurrentUser: () async {
+          final prefs = await SharedPreferences.getInstance();
+          return prefs.getString('username');
+        },
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(height: 5),
+            DropdownButton<ChartType>(
+              value: _selectedChartType,
+              items: [
+                DropdownMenuItem<ChartType>(
+                  value: ChartType.Bar,
+                  child: Text('Bar Chart'),
+                ),
+                DropdownMenuItem<ChartType>(
+                  value: ChartType.Pie,
+                  child: Text('Pie Chart'),
+                ),
+              ],
+              onChanged: (value) {
+                setState(() {
+                  _selectedChartType = value!;
+                });
+              },
+            ),
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: 600,
+              child: _selectedChartType == ChartType.Bar
+                  ? _buildBarChart()
+                  : _buildPieChart(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildBarChart() {
+    // Sort _topTracks in ascending order based on 'playcount'
+    _topTracks.sort((a, b) {
+      double playcountA = double.tryParse(a['playcount'] ?? '0') ?? 0;
+      double playcountB = double.tryParse(b['playcount'] ?? '0') ?? 0;
+      return playcountA.compareTo(playcountB);
+    });
+
+    // Calculate the total scrobble count
+    double totalScrobbles = _topTracks
+        .map((track) => double.tryParse(track['playcount'] ?? '0') ?? 0)
+        .fold(0, (acc, playcount) => acc + playcount);
+
+
+    return SfCartesianChart(
+      primaryXAxis: CategoryAxis(
+        labelStyle: TextStyle(
+          fontSize: 18,
+          color: Colors.black,
+        ),
+        labelPosition: ChartDataLabelPosition.inside,
+      ),
+      enableAxisAnimation: true,
+      series: <BarSeries<dynamic, String>>[
+        BarSeries<dynamic, String>(
+          dataSource: _topTracks.cast<Map<String, dynamic>>(),
+          xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
+          yValueMapper: (dynamic tracks, _) =>
+          double.tryParse(tracks['playcount'] ?? '0') ?? 0,
+          pointColorMapper: (dynamic tracks, _) =>
+          _topTracks.indexOf(tracks) % 2 == 0
+              ? Colors.green
+              : Colors.red,
+          dataLabelSettings: DataLabelSettings(
+            isVisible: false,
+            textStyle: TextStyle(
+              fontSize: 12,
+            ),
+          ),
+          enableTooltip: true,
+        ),
+      ],
+      tooltipBehavior: TooltipBehavior(
+        enable: true,
+        header: '',
+        canShowMarker: false,
+        format: 'Name: point.x\nPlaycount: point.y\nTotal Scrobble ${totalScrobbles.toStringAsFixed(0)}'
+      ),
+    );
+  }
+
+  Widget _buildPieChart() {
+    return GestureDetector(
+      onTap: () {
+        if (_topTracks.isNotEmpty) {
+          _showSongDetails(_topTracks[0]);
+        }
+      },
+      child: PieChart(
+        PieChartData(
+          sections: _getSections(),
+          pieTouchData: PieTouchData(
+            touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
+              if (event is FlLongPressEnd) {
+                if (touchResponse != null &&
+                    touchResponse.touchedSection != null) {
+                  _showSongDetails(
+                    _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
+                  );
+                }
+              }
+            },
+          ),
+        ),
+      ),
+    );
+
+  }
+
+
 
   Color _getColor(int index) {
     return Colors.accents[index % Colors.accents.length];
   }
 
-  void _showSongDetails(dynamic track) {
-    // Ensure that the index is within the valid range
+  void _showSongDetails(dynamic track) async {
     if (track != null && _topTracks.contains(track)) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Song Details"),
-            content: Column(
-              children: [
-                Text("Name: ${track['name']}"),
-                Text("Play Count: ${track['playcount']}"),
-              ],
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+        print('Showing song details for ${track['name']}');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            print('Building dialog for ${track['name']}');
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
-          );
-        },
-      );
+              child: Container(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [// Image at the top
+                    SizedBox(height: 16),
+                    // Song details in the center
+                    Text(
+                      "Name: ${track['name']}",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Play Count: ${track['playcount']}",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    SizedBox(height: 16),
+                    // OK button at the bottom
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text("OK"),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      } else {
+        print('Invalid track or track not in _topTracks');
+      }
     }
-  }
 }
 
 
