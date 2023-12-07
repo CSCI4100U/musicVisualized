@@ -26,6 +26,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
   DateTime? selectedDate; // Added to store the chosen date
+  bool _isUsernameTakenError = false; // Added to track username taken error
 
   // Date picker
   Future<void> _selectDate(BuildContext context) async {
@@ -81,10 +82,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
       // Check if the username is already taken
       if (await _isUsernameTaken(username)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Username is already taken. Please choose another one.')),
-        );
+        setState(() {
+          _isUsernameTakenError = true;
+        });
         return;
+      } else {
+        setState(() {
+          _isUsernameTakenError = false;
+        });
       }
 
       User newUser = User(
@@ -123,7 +128,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           children: <Widget>[
             TextFormField(
               controller: usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(labelText: 'Username', errorText: _isUsernameTakenError ? 'Username is already taken. Please choose another one.' : null),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
