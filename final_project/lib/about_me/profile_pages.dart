@@ -43,6 +43,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     fetchLastTrackData();
   }
 
+  //Fetches the total number of scrobbles for the user
   void _fetchData() async {
     int scrobbles = await fetchTotalScrobbles(widget.userData.lastFMUsername);
     setState(() {
@@ -50,6 +51,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
+  //Fetches the top song for the user
   void fetchTopSongData() async {
     final topData = await fetchTopSong(widget.userData.lastFMUsername);
     setState(() {
@@ -59,6 +61,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
+  //Fetches the last listened to song for the user
   void fetchLastTrackData() async {
     final topData = await fetchLastTrack(widget.userData.lastFMUsername);
     setState(() {
@@ -69,6 +72,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   }
 
+  //Fetches the top artist for the user
   void fetchArtistSongData() async {
     final topData = await fetchTopArtist(widget.userData.lastFMUsername);
     setState(() {
@@ -77,6 +81,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
+  //Fetches the top album for the user
   void fetchTopAlbumData() async {
     final topData = await fetchTopAlbum(widget.userData.lastFMUsername);
     setState(() {
@@ -86,6 +91,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
+ //Checks if the current user is following the user whose profile they are viewing
   Future<void> _checkIfFollowing() async {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUsername = prefs.getString('username');
@@ -104,7 +110,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-
+  //Handles the follow button
   Future<void> _handleFollow(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUsername = prefs.getString('username');
@@ -148,6 +154,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
+  //Gets the document reference for a user
   Future<DocumentReference?> _getDocumentReferenceByUsername(String username) async {
     try {
       final querySnapshot = await FirebaseFirestore.instance
@@ -165,6 +172,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     return null;
   }
 
+  //Handles the unfollow button
   Future<void> _handleUnfollow(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUsername = prefs.getString('username');
@@ -207,6 +215,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       );
     });
   }
+
+  //Shows the list of followers or following
   void _showListBottomSheet(BuildContext context, List<String> list, String title) {
     showModalBottomSheet(
         context: context,
@@ -444,6 +454,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
 }
 
+// The top section of the profile page
 class _TopGradientSection extends StatelessWidget {
   final AboutData userData;
 
@@ -464,6 +475,7 @@ class _TopGradientSection extends StatelessWidget {
 
 }
 
+//Fetches scrobbles for a user
 Future<int> fetchTotalScrobbles(String lastFMUsername) async {
   final _apiKey = dotenv.env['API_KEY'];
   final url = Uri.parse('http://ws.audioscrobbler.com/2.0/?method=user.getInfo&user=$lastFMUsername&api_key=$_apiKey&format=json');

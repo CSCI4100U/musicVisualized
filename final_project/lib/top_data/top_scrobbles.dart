@@ -77,17 +77,20 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     );
   }
 
+  //Saves the current user's username to shared preferences
   Future<String?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('username');
   }
 
+  //Fetches data from the Last.fm API
   void _fetchData({String? lastFmUsername}) async {
     await _fetchTopTracks(lastFmUsername);
     await _fetchTopAlbums(lastFmUsername);
     await _fetchTopArtists(lastFmUsername);
   }
 
+  //Fetches the user's top artists from the Last.fm API
   Future<void> _fetchTopArtists(String? username) async {
     try {
       final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
@@ -117,7 +120,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     }
   }
 
-
+  //Fetches the user's top albums from the Last.fm API
   Future<void> _fetchTopAlbums(String? username) async {
     try {
 
@@ -148,7 +151,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     }
   }
 
-
+  //Fetches the user's top tracks from the Last.fm API
   Future<void> _fetchTopTracks(String? username) async {
     try {
       final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
@@ -179,6 +182,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     }
   }
 
+  //Fetches the user's LastFM username from the database
   Future<String?> _getDefaultLastFmUsername() async {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUser = prefs.getString('username');
@@ -378,6 +382,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   }
 }
 
+//Fetches the user's top track from the Last.fm API
 Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
   await dotenv.load();
   final _apiKey = dotenv.get('API_KEY');
@@ -410,6 +415,7 @@ Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
   }
 }
 
+//Fetches the user's top artist from the Last.fm API
 Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
   await dotenv.load();
 
@@ -442,6 +448,7 @@ Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
   }
 }
 
+//Fetches the user's top album from the Last.fm API
 Future<Map<String, String>> fetchLastTrack(String lastFMUsername) async {
   final _apiKey = dotenv.env['API_KEY'];
   final url = Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFMUsername&api_key=1143c67892136c7d9318ebca82881c8c&format=json&limit=1');
@@ -471,6 +478,7 @@ Future<Map<String, String>> fetchLastTrack(String lastFMUsername) async {
   }
 }
 
+//Fetches the user's top album from the Last.fm API
 Future<Map<String, String>> fetchTopAlbum(String lastFMUsername) async {
   await dotenv.load();
 

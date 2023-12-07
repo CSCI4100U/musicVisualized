@@ -26,6 +26,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
   DateTime? selectedDate; // Added to store the chosen date
 
+  //Date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -52,7 +53,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     lastfmuserController.dispose();
     super.dispose();
   }
-
+  //Submit data to database
   void _submitData() async {
     if (_formKey.currentState!.validate()) {
       User newUser = User(

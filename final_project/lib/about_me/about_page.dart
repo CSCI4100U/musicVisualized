@@ -33,6 +33,7 @@ class _AboutMePageState extends State<AboutMePage> {
     _fetchUserData();
   }
 
+  //Function to fetch user data from firestore
   Future<void> _fetchUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final String? username = prefs.getString('username');
@@ -59,6 +60,7 @@ class _AboutMePageState extends State<AboutMePage> {
     }
   }
 
+  //Function to get last played song
   void fetchLastTrackData() async {
     final topData = await fetchLastTrack(aboutData!.lastFMUsername);
     setState(() {
@@ -69,6 +71,7 @@ class _AboutMePageState extends State<AboutMePage> {
 
   }
 
+  //Function to get top artist
   void fetchArtistSongData() async {
     final topData = await fetchTopArtist(aboutData!.lastFMUsername);
     setState(() {
@@ -77,6 +80,7 @@ class _AboutMePageState extends State<AboutMePage> {
     });
   }
 
+  //Function to get top album
   void fetchTopAlbumData() async {
     final topData = await fetchTopAlbum(aboutData!.lastFMUsername);
     setState(() {
@@ -86,6 +90,7 @@ class _AboutMePageState extends State<AboutMePage> {
     });
   }
 
+  //Function to get total scrobbles
   void _fetchData() async {
     if (aboutData != null) {
       int scrobbles = await fetchTotalScrobbles(aboutData!.lastFMUsername);
@@ -95,6 +100,7 @@ class _AboutMePageState extends State<AboutMePage> {
     }
   }
 
+  //Function to get top song
   void fetchTopSongData() async {
     if (aboutData != null) {
       final topData = await fetchTopSong(aboutData!.lastFMUsername);
@@ -105,7 +111,7 @@ class _AboutMePageState extends State<AboutMePage> {
     }
   }
 
-
+  //Function to prompt user to enter data if profile doesn't exist
   void _promptForDataEntry() {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => DataEntryForm()));
@@ -113,10 +119,10 @@ class _AboutMePageState extends State<AboutMePage> {
 
   Future<String?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
-
     return prefs.getString('username');
-
   }
+
+  //Building list of followers and following
   void _showListBottomSheet(BuildContext context, List<String> list, String title) {
     showModalBottomSheet(
         context: context,
@@ -329,12 +335,9 @@ class _AboutMePageState extends State<AboutMePage> {
       ),
     );
   }
-
-
-
-
-
 }
+
+//Search delegate for searching profiles
 class ProfileSearchDelegate extends SearchDelegate {
   @override
   List<Widget> buildActions(BuildContext context) {
@@ -407,6 +410,8 @@ class ProfileSearchDelegate extends SearchDelegate {
     return Container();
   }
 }
+
+//Class for building profile page
 class _TopGradientSection extends StatelessWidget {
   final AboutData userData;
 
