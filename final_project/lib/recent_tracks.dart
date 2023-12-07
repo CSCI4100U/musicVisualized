@@ -1,4 +1,5 @@
 import 'package:final_project/about_me/about_page.dart';
+import 'package:final_project/about_me/feed_page.dart';
 import 'package:final_project/account/user.dart';
 import 'package:final_project/top_data/geo_top_tracks.dart';
 import 'package:final_project/top_data/top_scrobbles.dart';
@@ -98,8 +99,11 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
 
       print("Last Fm user is: $lastFmUsername");
       print("Getting link");
+      //Get api key
+      await dotenv.load(fileName: ".env");
+      String _apiKey = dotenv.get('API_KEY');
       final response = await http.get(
-        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=8144424eb171da76b52e51f1f748995a&format=json&limit=100'),
+        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=100'),
       );
       print(response.body);
 
@@ -250,12 +254,23 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
             ),
             ListTile(
               leading: Icon(Icons.people),
-              title: Text('About Me'),
+              title: Text('Profiles'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => AboutMePage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Feed'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => FeedPage()),
                 );
               },
             ),

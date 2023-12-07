@@ -139,7 +139,7 @@ class _AboutMePageState extends State<AboutMePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('About Me'),
+        title: Text('Profiles'),
         backgroundColor: Colors.black87,
         elevation: 0,
         actions: <Widget>[
@@ -246,7 +246,7 @@ class _AboutMePageState extends State<AboutMePage> {
           ),
           ListTile(
             leading: Icon(Icons.people),
-            title: Text('About Me'),
+            title: Text('Profiles'),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushReplacement(

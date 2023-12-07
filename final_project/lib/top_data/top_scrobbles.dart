@@ -294,7 +294,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
             ),
             ListTile(
               leading: Icon(Icons.people),
-              title: Text('About Me'),
+              title: Text('Profiles'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushReplacement(

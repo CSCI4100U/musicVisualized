@@ -179,7 +179,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
             ),
             ListTile(
               leading: Icon(Icons.people),
-              title: Text('About Me'),
+              title: Text('Profiles'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.pushReplacement(
