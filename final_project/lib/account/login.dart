@@ -74,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Login'),
+          backgroundColor: Colors.black87,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())

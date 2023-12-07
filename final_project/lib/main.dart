@@ -1,8 +1,8 @@
-import 'package:final_project/top_data/top_visulized_data.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:google_fonts/google_fonts.dart'; // Add this import
 import 'package:shared_preferences/shared_preferences.dart';
 import '../account/login.dart';
 import '../account/registration.dart';
@@ -16,8 +16,7 @@ Future<void> main() async {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
   FlutterLocalNotificationsPlugin();
   final InitializationSettings initializationSettings =
-  InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'));
+  InitializationSettings(android: AndroidInitializationSettings('@mipmap/ic_launcher'));
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   runApp(MyApp());
@@ -27,7 +26,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Modern Landing Page',
+      title: 'MusicVisualized',
       theme: ThemeData(
         backgroundColor: Colors.black87,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -81,15 +80,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     final lastActive = prefs.getInt('lastActive');
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    if (lastActive == null || now - lastActive > 259200000) { // 3 days in milliseconds
+    if (lastActive == null || now - lastActive > 259200000) {
       _scheduleNotification();
     }
   }
 
   void _scheduleNotification() async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
-    AndroidNotificationDetails(
-        'engagement_channel', 'Engagement Channel',
+    AndroidNotificationDetails('engagement_channel', 'Engagement Channel',
         channelDescription: 'Channel for User Engagement',
         importance: Importance.max,
         priority: Priority.high,
@@ -123,25 +121,80 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Home Page'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            ElevatedButton(
-              child: Text('Login'),
-              onPressed: () => navigateToLogin(context),
+    return Stack(
+      children: <Widget>[
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/file-SVKCcdXxjhSPQqTUCbiRdJ6x.png'), // Update with your asset path
+              fit: BoxFit.cover,
             ),
-            ElevatedButton(
-              child: Text('Register'),
-              onPressed: () => navigateToRegister(context),
-            ),
-          ],
+          ),
         ),
-      ),
+        Positioned(
+          top: 0,
+          left: 0,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Music',
+                    style: GoogleFonts.caveat(
+                      fontSize: 55,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 5), // Adjusted space to 5 units
+                TextButton(
+                  onPressed: () {},
+                  child: Text(
+                    'Visualized',
+                    style: GoogleFonts.caveat(
+                      fontSize: 55,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          left: 20,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.red,
+              onPrimary: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Adjusted padding
+            ),
+            onPressed: () => navigateToLogin(context),
+            child: Text('Login', style: TextStyle(fontSize: 18)), // Adjusted font size
+          ),
+        ),
+        Positioned(
+          bottom: 20,
+          right: 20,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.green,
+              onPrimary: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Adjusted padding
+            ),
+            onPressed: () => navigateToRegister(context),
+            child: Text('Register', style: TextStyle(fontSize: 18)), // Adjusted font size
+          ),
+        ),
+      ],
     );
   }
 }

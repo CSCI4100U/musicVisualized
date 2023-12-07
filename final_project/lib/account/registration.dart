@@ -120,6 +120,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Registration'),
+          backgroundColor: Colors.black87,
       ),
       body: Form(
         key: _formKey,
