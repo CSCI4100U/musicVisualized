@@ -67,7 +67,8 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       return data['tracks']['track'];
     } else {
       throw Exception('Failed to load top tracks');

@@ -92,7 +92,8 @@ class _FeedPageState extends State<FeedPage> {
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         List<dynamic> tracks = data['recenttracks']['track'];
         return tracks.isNotEmpty ? [tracks.first] : [];
       } else {

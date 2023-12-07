@@ -111,7 +111,8 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
       print("kekw");
       if (response.statusCode == 200) {
         print('did i make it?');
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _tracks = data['recenttracks']['track'];
           _isLoading = false;

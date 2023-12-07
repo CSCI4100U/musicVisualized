@@ -33,14 +33,14 @@ class TrackListTile extends StatelessWidget {
 
     return Card(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0), // Rounded corners for the card
+        borderRadius: BorderRadius.circular(10.0),
       ),
       elevation: 5, // Match elevation with your other cards
       margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8.0), // Rounded corners for the image
+          borderRadius: BorderRadius.circular(8.0),
           child: Image.network(
             track['image'][1]['#text'].isEmpty ? 'http://mcgodftw.dev/i/r2kyqb6k.png' : track['image'][1]['#text'],
             width: 50,
@@ -53,7 +53,7 @@ class TrackListTile extends StatelessWidget {
           track['name'],
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.black87, // Optional: Adjust the text color if needed
+            color: Colors.black87,
           ),
         ),
         subtitle: Column(
@@ -62,18 +62,18 @@ class TrackListTile extends StatelessWidget {
             Text(
               track['artist']['#text'],
               style: TextStyle(
-                color: Colors.black54, // Optional: Adjust the text color if needed
+                color: Colors.black54,
               ),
             ),
             Text(
               scrobbledTime,
               style: TextStyle(
-                color: Colors.black54, // Optional: Adjust the text color if needed
+                color: Colors.black54,
               ),
             ),
           ],
         ),
-        trailing: Icon(Icons.more_vert, color: Colors.black54), // Adjust icon color if needed
+        trailing: Icon(Icons.more_vert, color: Colors.black54),
       ),
     );
   }

@@ -104,7 +104,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _topArtists = data['topartists']['artist'];
         });
@@ -134,7 +135,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _topAlbums = data['topalbums']['album'];
         });
@@ -163,7 +165,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _topTracks = data['toptracks']['track'];
         });
@@ -185,9 +188,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
     return _databaseHelper.getLastFmUsername(currentUser);
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -402,7 +402,8 @@ Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       final topTrack = data['toptracks']['track'][0];
       final topSong = topTrack['name'];
       final topArtist = topTrack['artist']['name'];
@@ -434,7 +435,8 @@ Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
 
       final topArtistData = data['topartists']['artist'][0];
       final topArtist = topArtistData['name'];
@@ -458,11 +460,11 @@ Future<Map<String, String>> fetchLastTrack(String lastFMUsername) async {
   final _apiKey = dotenv.env['API_KEY'];
   final url = Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFMUsername&api_key=1143c67892136c7d9318ebca82881c8c&format=json&limit=1');
 
-  //Return the last song the user listened to
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       //Parse the song name and artist name
       final song = data['recenttracks']['track'][0]['name'];
       final artist = data['recenttracks']['track'][0]['artist']['#text'];
@@ -494,7 +496,8 @@ Future<Map<String, String>> fetchTopAlbum(String lastFMUsername) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
 
       final topAlbumData = data['topalbums']['album'][0];
       final topAlbum = topAlbumData['name'];

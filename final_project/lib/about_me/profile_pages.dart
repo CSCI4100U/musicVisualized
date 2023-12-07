@@ -471,7 +471,8 @@ Future<int> fetchTotalScrobbles(String lastFMUsername) async {
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       final scrobbles = int.parse(data['user']['playcount']);
       return scrobbles;
     }
