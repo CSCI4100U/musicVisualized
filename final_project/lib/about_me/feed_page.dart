@@ -6,6 +6,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+import '../recent_tracks.dart';
+import '../top_data/geo_top_tracks.dart';
+import '../top_data/top_scrobbles.dart';
+import '../top_data/top_visulized_data.dart';
+import '../utils/app_drawer.dart';
+import 'about_page.dart';
+import 'feed_tiles.dart';
+
 class FeedPage extends StatefulWidget {
   @override
   _FeedPageState createState() => _FeedPageState();
@@ -29,7 +37,9 @@ class _FeedPageState extends State<FeedPage> {
     });
 
     for (var user in users) {
+      print(user);
       var tracks = await getRecentTracksForUser(user);
+      print(tracks);
       setState(() {
         recentTracks[user] = tracks;
       });
@@ -40,6 +50,8 @@ class _FeedPageState extends State<FeedPage> {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUsername = prefs.getString('username');
 
+    List<String> followedUsersLastFMUsernames = [];
+
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('aboutme')
@@ -48,16 +60,28 @@ class _FeedPageState extends State<FeedPage> {
           .get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        var following = querySnapshot.docs.first.get('following');
-        if (following is List) {
-          return following.map((item) => item.toString()).toList();
+        var followingList = querySnapshot.docs.first.data()['following'] as List<dynamic>;
+
+        for (var followedUsername in followingList) {
+          var userDoc = await FirebaseFirestore.instance
+              .collection('aboutme')
+              .where('username', isEqualTo: followedUsername)
+              .limit(1)
+              .get();
+
+          if (userDoc.docs.isNotEmpty) {
+            var lastFMUsername = userDoc.docs.first.data()['lastFMUsername'] as String;
+            followedUsersLastFMUsernames.add(lastFMUsername);
+          }
         }
       }
     } catch (e) {
       print("Error fetching document: $e");
     }
-    return [];
+
+    return followedUsersLastFMUsernames;
   }
+
 
 
   Future<List<dynamic>> getRecentTracksForUser(String username) async {
@@ -70,7 +94,7 @@ class _FeedPageState extends State<FeedPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         List<dynamic> tracks = data['recenttracks']['track'];
-        return tracks;
+        return tracks.isNotEmpty ? [tracks.first] : [];
       } else {
         print('Failed to fetch data: ${response.statusCode}');
         return [];
@@ -81,6 +105,13 @@ class _FeedPageState extends State<FeedPage> {
     }
   }
 
+  Future<String?> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    return prefs.getString('username');
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,25 +119,48 @@ class _FeedPageState extends State<FeedPage> {
         title: Text('Feed'),
         backgroundColor: Colors.black87,
       ),
+      drawer: AppDrawer(
+        getCurrentUser: () async {
+          final prefs = await SharedPreferences.getInstance();
+          return prefs.getString('username');
+        },
+      ),
       body: ListView.builder(
         itemCount: followedUsers.length,
         itemBuilder: (context, index) {
           var user = followedUsers[index];
           var tracks = recentTracks[user] ?? [];
 
-          return ListTile(
-            title: Text(user),
-            subtitle: ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: tracks.length,
-              itemBuilder: (context, trackIndex) {
-                var track = tracks[trackIndex];
-                return ListTile(
-                  title: Text(track['name'] ?? 'Unknown Track'),
-                  subtitle: Text(track['artist']['#text'] ?? 'Unknown Artist'),
-                );
-              },
+          return Card(
+            margin: EdgeInsets.all(8),
+            elevation: 2,
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    user,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ),
+                Divider(),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: tracks.length,
+                  itemBuilder: (context, trackIndex) {
+                    var track = tracks[trackIndex];
+                    return TrackTile(
+                      trackName: track['name'] ?? 'Unknown Track',
+                      artistName: track['artist']['#text'] ?? 'Unknown Artist',
+                    );
+                  },
+                ),
+              ],
             ),
           );
         },

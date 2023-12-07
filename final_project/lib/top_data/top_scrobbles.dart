@@ -7,6 +7,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:final_project/utils/fetch_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../about_me/about_page.dart';
+import '../utils/app_drawer.dart';
 import '../utils/db_utils.dart';
 import '../recent_tracks.dart';
 
@@ -213,98 +214,11 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
           _buildArtistList(_topArtists),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.black87,
-              ),
-              child: FutureBuilder<String?>(
-                future: getCurrentUser(),
-                builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    if (snapshot.hasData) {
-                      return Text(
-                        "Welcome, " + snapshot.data!,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        ),
-                      );
-                    } else {
-                      return Text(
-                        'Guest',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                        ),
-                      );
-                    }
-                  } else {
-                    return CircularProgressIndicator();
-                  }
-                },
-              ),
-            ),
-            ListTile(
-              leading: Icon(Icons.music_note),
-              title: Text('Top Scrobbles'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => TopScrobblesPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.history),
-              title: Text('Recent Tracks'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => RecentTracksPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.language),
-              title: Text('Top Tracks by Country'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MostStreamedTracksPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.bar_chart),
-              title: Text('Data Visualized'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => VisualizedDataPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.people),
-              title: Text('Profiles'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => AboutMePage()),
-                );
-              },
-            ),
-          ],
-        ),
+      drawer: AppDrawer(
+        getCurrentUser: () async {
+          final prefs = await SharedPreferences.getInstance();
+          return prefs.getString('username');
+        },
       ),
     );
   }
