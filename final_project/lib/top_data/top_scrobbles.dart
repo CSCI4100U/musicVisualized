@@ -268,11 +268,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                       ),
                     ),
                     subtitle: Text('Artist: $artistName\nPlay count: $playCount'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.more_vert),
-                      onPressed: () {
-                      },
-                    ),
                   ),
                 );
               }
@@ -318,10 +313,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                     ),
                     subtitle: Text(
                         'Artist: $artistName\nPlay count: $playCount'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.more_vert),
-                      onPressed: () {},
-                    ),
                   ),
                 );
               }
@@ -377,11 +368,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                     ),
                   ),
                   subtitle: Text('Play count: $playCount'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: () {
-                    },
-                  ),
                 ),
               );
             }

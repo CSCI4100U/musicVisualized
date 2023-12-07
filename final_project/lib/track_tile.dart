@@ -73,7 +73,6 @@ class TrackListTile extends StatelessWidget {
             ),
           ],
         ),
-        trailing: Icon(Icons.more_vert, color: Colors.black54),
       ),
     );
   }
