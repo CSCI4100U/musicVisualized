@@ -90,6 +90,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
+                } else if (!value.contains('@')) {
+                  return 'Invalid email format';
                 }
                 return null;
               },
