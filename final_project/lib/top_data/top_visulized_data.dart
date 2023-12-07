@@ -230,6 +230,18 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
   }
 
   Widget _buildBarChart() {
+    // Sort _topTracks in ascending order based on 'playcount'
+    _topTracks.sort((a, b) {
+      double playcountA = double.tryParse(a['playcount'] ?? '0') ?? 0;
+      double playcountB = double.tryParse(b['playcount'] ?? '0') ?? 0;
+      return playcountA.compareTo(playcountB);
+    });
+
+    // Calculate the total scrobble count
+    double totalScrobbles = _topTracks
+        .map((track) => double.tryParse(track['playcount'] ?? '0') ?? 0)
+        .fold(0, (acc, playcount) => acc + playcount);
+
     return SfCartesianChart(
       primaryXAxis: CategoryAxis(
         labelStyle: TextStyle(
@@ -245,6 +257,10 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
           xValueMapper: (dynamic tracks, _) => tracks['name'].toString(),
           yValueMapper: (dynamic tracks, _) =>
           double.tryParse(tracks['playcount'] ?? '0') ?? 0,
+          pointColorMapper: (dynamic tracks, _) =>
+          _topTracks.indexOf(tracks) % 2 == 0
+              ? Colors.grey
+              : Colors.orange,
           dataLabelSettings: DataLabelSettings(
             isVisible: false,
             textStyle: TextStyle(
@@ -258,7 +274,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
         enable: true,
         header: '',
         canShowMarker: false,
-        format: 'point.y',
+        format: 'Name: point.x\nPlaycount: point.y\nTotal Scrobbles: $totalScrobbles',
       ),
     );
   }
