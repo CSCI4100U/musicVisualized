@@ -1,5 +1,6 @@
 import 'package:final_project/account/user.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../utils/db_utils.dart';
 import 'login.dart';
 
@@ -23,7 +24,23 @@ class _RegistrationPageState extends State<RegistrationPage> {
   TextEditingController lastfmuserController = TextEditingController();
 
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
+  DateTime? selectedDate; // Added to store the chosen date
 
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null && picked != selectedDate) {
+      setState(() {
+        selectedDate = picked;
+        dobController.text = DateFormat('MM/dd/yyyy').format(picked);
+      });
+    }
+  }
   @override
   void dispose() {
     usernameController.dispose();
@@ -61,6 +78,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
     }
   }
+
 
 
   @override
@@ -129,8 +147,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
             ),
             TextFormField(
               controller: dobController,
-              decoration: InputDecoration(labelText: 'Date of Birth'),
-              keyboardType: TextInputType.datetime,
+              decoration: InputDecoration(
+                labelText: 'Date of Birth',
+                suffixIcon: Icon(Icons.date_range),
+              ),
+              readOnly: true,
+              onTap: () => _selectDate(context),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
