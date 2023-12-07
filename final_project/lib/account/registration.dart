@@ -1,6 +1,7 @@
 import 'package:final_project/account/user.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/db_utils.dart';
 import 'login.dart';
 
@@ -26,7 +27,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
   DateTime? selectedDate; // Added to store the chosen date
 
-  //Date picker
+  // Date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -42,6 +43,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
       });
     }
   }
+
+  Future<bool> _isUsernameTaken(String username) async {
+    try {
+      final querySnapshot =
+      await FirebaseFirestore.instance.collection('aboutme').get();
+
+      final usernames = querySnapshot.docs
+          .map((doc) => doc['username'].toString().toLowerCase())
+          .toList();
+
+      print('Fetched usernames from Firestore: $usernames');
+
+      return usernames.contains(username.toLowerCase());
+    } catch (e) {
+      print("Error checking username: $e");
+      return true;
+    }
+  }
+
   @override
   void dispose() {
     usernameController.dispose();
@@ -53,11 +73,22 @@ class _RegistrationPageState extends State<RegistrationPage> {
     lastfmuserController.dispose();
     super.dispose();
   }
-  //Submit data to database
+
+  // Submit data to local SQLite database
   void _submitData() async {
     if (_formKey.currentState!.validate()) {
+      final String username = usernameController.text;
+
+      // Check if the username is already taken
+      if (await _isUsernameTaken(username)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Username is already taken. Please choose another one.')),
+        );
+        return;
+      }
+
       User newUser = User(
-        username: usernameController.text,
+        username: username,
         email: emailController.text,
         password: passwordController.text,
         firstName: firstNameController.text,
@@ -76,11 +107,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
-
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
