@@ -5,9 +5,12 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/app_drawer.dart';
+import '../utils/fetch_image.dart';
+
+const Color silverColor = Color(0xFFC0C0C0);
+const Color goldColor = Color(0xFFFFD700);
+const Color bronzeColor = Color(0xFFCD7F32);
 
 class MostStreamedTracksPage extends StatefulWidget {
   @override
@@ -74,6 +77,33 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
     }
   }
 
+  Future<String> fetchTrackImageUrl(String artist, String track) async {
+    await dotenv.load();
+    final accessToken = await getSpotifyAccessToken();
+
+    final artistQueryParam = Uri.encodeQueryComponent(artist);
+    final trackQueryParam = Uri.encodeQueryComponent(track);
+
+    final searchUrl = Uri.parse(
+        'https://api.spotify.com/v1/search?q=track:"$trackQueryParam" artist:"$artistQueryParam"&type=track&limit=1');
+
+    final response = await http.get(searchUrl, headers: {
+      'Authorization': 'Bearer $accessToken',
+    });
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['tracks']['items'].isNotEmpty) {
+        final trackImageUrl =
+        data['tracks']['items'][0]['album']['images'][0]['url'];
+        return trackImageUrl;
+      }
+    }
+
+    // Handle error or return a default image URL
+    return 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+  }
+
   void displayTopTracks(String country) async {
     setState(() {
       _isLoading = true;
@@ -122,38 +152,79 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
         itemCount: _tracks.length,
         itemBuilder: (context, index) {
           var track = _tracks[index];
-          return Container(
-            margin: EdgeInsets.all(8.0),
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(8.0),
+
+          // Determine size and outline color based on position
+          double size = 50.0; // Default size
+          Color outlineColor = Colors.transparent; // Default outline color
+          if (index == 0) {
+            size = 80.0; // Larger size for the first track
+            outlineColor = goldColor; // Gold outline for the first track
+          } else if (index == 1) {
+            size = 70.0; // Slightly smaller size for the second track
+            outlineColor =
+                silverColor; // Silver outline for the second track
+          } else if (index == 2) {
+            size = 60.0; // Slightly smaller size for the third track
+            outlineColor =
+                bronzeColor; // Bronze outline for the third track
+          }
+
+          return FutureBuilder<String>(
+            future: fetchTrackImageUrl(
+              track['artist']['name'],
+              track['name'],
             ),
-            child: ListTile(
-              title: Text(
-                track['name'],
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(track['artist']['name']),
-              leading: Container(
-                width: 80.0,
-                height: 80.0,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    track['image'][0]['#text'],
-                    fit: BoxFit.cover,
+            builder:
+                (BuildContext context, AsyncSnapshot<String> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else {
+                String imageUrl = snapshot.data ??
+                    'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                    side: BorderSide(
+                      color: outlineColor,
+                      width: 2.0,
+                    ),
                   ),
-                ),
-              ),
-            ),
+                  elevation: 5,
+                  margin:
+                  EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        imageUrl,
+                        width: size,
+                        height: size,
+                        fit: BoxFit.cover,
+                        errorBuilder:
+                            (context, error, stackTrace) {
+                          return Icon(Icons.broken_image);
+                        },
+                      ),
+                    ),
+                    title: Text(
+                      track['name'],
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                        'Artist: ${track['artist']['name']}\nPlay count: ${track['playcount']}'),
+                    trailing: IconButton(
+                      icon: Icon(Icons.more_vert),
+                      onPressed: () {},
+                    ),
+                  ),
+                );
+              }
+            },
           );
-        },
-      ),
-      drawer: AppDrawer(
-        getCurrentUser: () async {
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getString('username');
         },
       ),
     );

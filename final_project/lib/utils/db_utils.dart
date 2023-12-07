@@ -22,6 +22,7 @@ class DatabaseHelper {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
+  // Create a user in the database
   Future<int> createUser(User user) async {
     final db = await instance.database;
 
@@ -30,6 +31,7 @@ class DatabaseHelper {
     return id;
   }
 
+  // Create the database if it doesn't exist
   Future _createDB(Database db, int version) async {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
@@ -56,13 +58,9 @@ class DatabaseHelper {
     final db = await instance.database;
     db.close();
   }
-
+  // Verify the user's credentials
   Future<bool> verifyUser(String username, String password) async {
     final db = await instance.database;
-
-    // Hash the password. In a real-world application, you would salt it as well
-
-    // Query the database for the username
     final result = await db.query(
       'users',
       columns: ['username', 'password'],
@@ -71,11 +69,8 @@ class DatabaseHelper {
     );
 
     if (result.isNotEmpty) {
-      // Compare the stored hashed password with the hashed version of the input password
       return result.first['password'] == password;
     }
-
-    // If the user was not found or the password did not match, return false
     return false;
   }
 

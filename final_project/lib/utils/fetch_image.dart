@@ -31,7 +31,6 @@ Future<String> fetchTrackImageUrl(String artist, String track) async {
 
 Future<String> fetchAlbumImageUrl(String artist, String album) async {
   await dotenv.load();
-  final apiKey = dotenv.get('SPOTIFY_API_KEY');
   final accessToken = await getSpotifyAccessToken();
 
   final artistQueryParam = Uri.encodeQueryComponent(artist);
@@ -116,6 +115,5 @@ Future<String> fetchArtistImageUrl(String artist) async {
     }
   }
 
-  // Handle error or return a default image URL
   return 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
 }

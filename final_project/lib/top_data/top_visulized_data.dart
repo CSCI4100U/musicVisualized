@@ -85,7 +85,8 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       setState(() {
         _topTracks = data['toptracks']['track'];
         _showVisualiseDialog();

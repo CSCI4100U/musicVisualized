@@ -72,6 +72,7 @@ class _DataEntryFormState extends State<DataEntryForm> {
     );
   }
 
+  // Save the user's data to firestore
   Future<void> _saveUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final String? username = prefs.getString('username');

@@ -5,13 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
-import '../recent_tracks.dart';
-import '../top_data/geo_top_tracks.dart';
-import '../top_data/top_scrobbles.dart';
-import '../top_data/top_visulized_data.dart';
 import '../utils/app_drawer.dart';
-import 'about_page.dart';
 import 'feed_tiles.dart';
 
 class FeedPage extends StatefulWidget {
@@ -29,9 +23,9 @@ class _FeedPageState extends State<FeedPage> {
     fetchFollowedUsers();
   }
 
+  //Fetches the tracks for the users that the current user is following
   void fetchFollowedUsers() async {
     List<dynamic> users = await getFollowedUsers();
-
     setState(() {
       followedUsers = users;
     });
@@ -46,6 +40,7 @@ class _FeedPageState extends State<FeedPage> {
     }
   }
 
+  //Fetches the users that the current user is following
   Future<List<String>> getFollowedUsers() async {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUsername = prefs.getString('username');
@@ -83,7 +78,7 @@ class _FeedPageState extends State<FeedPage> {
   }
 
 
-
+  //Fetches the most recent track for a given user
   Future<List<dynamic>> getRecentTracksForUser(String username) async {
     await dotenv.load(fileName: ".env");
     String _apiKey = dotenv.get('API_KEY');
@@ -92,7 +87,8 @@ class _FeedPageState extends State<FeedPage> {
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         List<dynamic> tracks = data['recenttracks']['track'];
         return tracks.isNotEmpty ? [tracks.first] : [];
       } else {
@@ -107,9 +103,7 @@ class _FeedPageState extends State<FeedPage> {
 
   Future<String?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
-
     return prefs.getString('username');
-
   }
 
   @override

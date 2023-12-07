@@ -77,17 +77,20 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     );
   }
 
+  //Saves the current user's username to shared preferences
   Future<String?> getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('username');
   }
 
+  //Fetches data from the Last.fm API
   void _fetchData({String? lastFmUsername}) async {
     await _fetchTopTracks(lastFmUsername);
     await _fetchTopAlbums(lastFmUsername);
     await _fetchTopArtists(lastFmUsername);
   }
 
+  //Fetches the user's top artists from the Last.fm API
   Future<void> _fetchTopArtists(String? username) async {
     try {
       final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
@@ -104,7 +107,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _topArtists = data['topartists']['artist'];
         });
@@ -116,7 +120,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     }
   }
 
-
+  //Fetches the user's top albums from the Last.fm API
   Future<void> _fetchTopAlbums(String? username) async {
     try {
 
@@ -134,7 +138,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _topAlbums = data['topalbums']['album'];
         });
@@ -146,7 +151,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     }
   }
 
-
+  //Fetches the user's top tracks from the Last.fm API
   Future<void> _fetchTopTracks(String? username) async {
     try {
       final String? lastFmUsername = username ?? await _getDefaultLastFmUsername();
@@ -163,7 +168,8 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        var decodedBody = utf8.decode(response.bodyBytes);
+        final data = json.decode(decodedBody);
         setState(() {
           _topTracks = data['toptracks']['track'];
         });
@@ -176,6 +182,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     }
   }
 
+  //Fetches the user's LastFM username from the database
   Future<String?> _getDefaultLastFmUsername() async {
     final prefs = await SharedPreferences.getInstance();
     final String? currentUser = prefs.getString('username');
@@ -185,9 +192,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
     final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
     return _databaseHelper.getLastFmUsername(currentUser);
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -268,11 +272,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                       ),
                     ),
                     subtitle: Text('Artist: $artistName\nPlay count: $playCount'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.more_vert),
-                      onPressed: () {
-                      },
-                    ),
                   ),
                 );
               }
@@ -318,10 +317,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                     ),
                     subtitle: Text(
                         'Artist: $artistName\nPlay count: $playCount'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.more_vert),
-                      onPressed: () {},
-                    ),
                   ),
                 );
               }
@@ -377,11 +372,6 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                     ),
                   ),
                   subtitle: Text('Play count: $playCount'),
-                  trailing: IconButton(
-                    icon: Icon(Icons.more_vert),
-                    onPressed: () {
-                    },
-                  ),
                 ),
               );
             }
@@ -392,6 +382,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   }
 }
 
+//Fetches the user's top track from the Last.fm API
 Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
   await dotenv.load();
   final _apiKey = dotenv.get('API_KEY');
@@ -402,7 +393,8 @@ Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       final topTrack = data['toptracks']['track'][0];
       final topSong = topTrack['name'];
       final topArtist = topTrack['artist']['name'];
@@ -423,6 +415,7 @@ Future<Map<String, String>> fetchTopSong(String lastFMUsername) async {
   }
 }
 
+//Fetches the user's top artist from the Last.fm API
 Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
   await dotenv.load();
 
@@ -434,7 +427,8 @@ Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
 
       final topArtistData = data['topartists']['artist'][0];
       final topArtist = topArtistData['name'];
@@ -454,15 +448,16 @@ Future<Map<String, String>> fetchTopArtist(String lastFMUsername) async {
   }
 }
 
+//Fetches the user's top album from the Last.fm API
 Future<Map<String, String>> fetchLastTrack(String lastFMUsername) async {
   final _apiKey = dotenv.env['API_KEY'];
   final url = Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFMUsername&api_key=1143c67892136c7d9318ebca82881c8c&format=json&limit=1');
 
-  //Return the last song the user listened to
   try {
     final response = await http.get(url);
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
       //Parse the song name and artist name
       final song = data['recenttracks']['track'][0]['name'];
       final artist = data['recenttracks']['track'][0]['artist']['#text'];
@@ -483,6 +478,7 @@ Future<Map<String, String>> fetchLastTrack(String lastFMUsername) async {
   }
 }
 
+//Fetches the user's top album from the Last.fm API
 Future<Map<String, String>> fetchTopAlbum(String lastFMUsername) async {
   await dotenv.load();
 
@@ -494,7 +490,8 @@ Future<Map<String, String>> fetchTopAlbum(String lastFMUsername) async {
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      var decodedBody = utf8.decode(response.bodyBytes);
+      final data = json.decode(decodedBody);
 
       final topAlbumData = data['topalbums']['album'][0];
       final topAlbum = topAlbumData['name'];

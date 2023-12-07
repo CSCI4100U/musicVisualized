@@ -1,6 +1,7 @@
 import 'package:final_project/account/user.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/db_utils.dart';
 import 'login.dart';
 
@@ -25,7 +26,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   final DatabaseHelper _databaseHelper = DatabaseHelper.instance;
   DateTime? selectedDate; // Added to store the chosen date
+  bool _isUsernameTakenError = false; // Added to track username taken error
 
+  // Date picker
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -41,6 +44,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
       });
     }
   }
+
+  Future<bool> _isUsernameTaken(String username) async {
+    try {
+      final querySnapshot =
+      await FirebaseFirestore.instance.collection('aboutme').get();
+
+      final usernames = querySnapshot.docs
+          .map((doc) => doc['username'].toString().toLowerCase())
+          .toList();
+
+      print('Fetched usernames from Firestore: $usernames');
+
+      return usernames.contains(username.toLowerCase());
+    } catch (e) {
+      print("Error checking username: $e");
+      return true;
+    }
+  }
+
   @override
   void dispose() {
     usernameController.dispose();
@@ -53,10 +75,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
     super.dispose();
   }
 
+  // Submit data to local SQLite database
   void _submitData() async {
     if (_formKey.currentState!.validate()) {
+      final String username = usernameController.text;
+
+      // Check if the username is already taken
+      if (await _isUsernameTaken(username)) {
+        setState(() {
+          _isUsernameTakenError = true;
+        });
+        return;
+      } else {
+        setState(() {
+          _isUsernameTakenError = false;
+        });
+      }
+
       User newUser = User(
-        username: usernameController.text,
+        username: username,
         email: emailController.text,
         password: passwordController.text,
         firstName: firstNameController.text,
@@ -75,11 +112,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
       );
-
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +128,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           children: <Widget>[
             TextFormField(
               controller: usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: InputDecoration(labelText: 'Username', errorText: _isUsernameTakenError ? 'Username is already taken. Please choose another one.' : null),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
