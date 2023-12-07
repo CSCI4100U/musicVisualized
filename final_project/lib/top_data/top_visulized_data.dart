@@ -21,6 +21,7 @@ class VisualizedDataPage extends StatefulWidget {
 
 class _VisualizedDataPageState extends State<VisualizedDataPage> {
   List<dynamic> _topTracks = [];
+  List<dynamic> _topArtists = [];
   bool _isDialogShown = false;
   ChartType _selectedChartType = ChartType.Bar;
 
@@ -89,6 +90,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       final data = json.decode(decodedBody);
       setState(() {
         _topTracks = data['toptracks']['track'];
+        _topArtists = data['topartists']['artist'];
         _showVisualiseDialog();
 
       });
@@ -142,6 +144,18 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     String mostScrobbledTrackName = mostScrobbledTrack['name'].toString();
 
     return mostScrobbledTrackName;
+  }
+  String getArtistNameForTrack(String targetSongName) {
+    String artistName = 'Unknown Artist';
+
+    for (Map<String, dynamic> track in _topTracks) {
+      if (track['name'] == targetSongName) {
+        artistName = track['artist']['name'] ?? 'Unknown Artist';
+        break;
+      }
+    }
+
+    return artistName;
   }
 
 
@@ -197,7 +211,6 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     );
   }
 
-
   Widget _buildBarChart() {
     // Sort _topTracks in ascending order based on 'playcount'
     _topTracks.sort((a, b) {
@@ -206,12 +219,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       return playcountA.compareTo(playcountB);
     });
 
-    // Calculate the total scrobble count
-    double totalScrobbles = _topTracks
-        .map((track) => double.tryParse(track['playcount'] ?? '0') ?? 0)
-        .fold(0, (acc, playcount) => acc + playcount);
-
-
+    String artistName;
     return SfCartesianChart(
       primaryXAxis: CategoryAxis(
         labelStyle: TextStyle(
@@ -228,9 +236,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
           yValueMapper: (dynamic tracks, _) =>
           double.tryParse(tracks['playcount'] ?? '0') ?? 0,
           pointColorMapper: (dynamic tracks, _) =>
-          _topTracks.indexOf(tracks) % 2 == 0
-              ? Colors.green
-              : Colors.red,
+          _topTracks.indexOf(tracks) % 2 == 0 ? Colors.green : Colors.red,
           dataLabelSettings: DataLabelSettings(
             isVisible: false,
             textStyle: TextStyle(
@@ -244,7 +250,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
         enable: true,
         header: '',
         canShowMarker: false,
-        format: 'Name: point.x\nPlaycount: point.y\nTotal Scrobble ${totalScrobbles.toStringAsFixed(0)}'
+        format: 'Name: point.x\nArtist: \nPlaycount: point.y',
       ),
     );
   }
