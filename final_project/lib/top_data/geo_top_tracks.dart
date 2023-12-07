@@ -5,9 +5,10 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../utils/app_drawer.dart';
+const Color silverColor = Color(0xFFB0C4DE); // Adjusted silver color
+const Color goldColor = Color(0xFFFFD700);
+const Color bronzeColor = Color(0xFFCD7F32);
 
 class MostStreamedTracksPage extends StatefulWidget {
   @override
@@ -122,12 +123,42 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
         itemCount: _tracks.length,
         itemBuilder: (context, index) {
           var track = _tracks[index];
+          // Determine size and outline color based on position
+          double size = 80.0; // Default size
+          double outlineWidth = 2.0; // Default outline width
+          Color outlineColor = Colors.transparent; // Default outline color
+
+          if (index == 0) {
+            size = 110.0; // Larger size for the first track
+            outlineWidth = 4.0; // Bolder outline for the first track
+            outlineColor = goldColor; // Gold outline for the first track
+          } else if (index == 1) {
+            size = 100.0; // Slightly smaller size for the second track
+            outlineWidth = 3.0; // Bolder outline for the second track
+            outlineColor = silverColor; // Updated silver outline color
+          } else if (index == 2) {
+            size = 95.0; // Slightly smaller size for the third track
+            outlineWidth = 3.0; // Bolder outline for the third track
+            outlineColor = bronzeColor; // Bronze outline for the third track
+          }
+
           return Container(
             margin: EdgeInsets.all(8.0),
-            padding: EdgeInsets.all(8.0),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8.0),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 3),
+                ),
+              ],
+              border: Border.all(
+                color: outlineColor,
+                width: outlineWidth,
+              ),
             ),
             child: ListTile(
               title: Text(
@@ -136,8 +167,8 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
               ),
               subtitle: Text(track['artist']['name']),
               leading: Container(
-                width: 80.0,
-                height: 80.0,
+                width: size,
+                height: size,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.network(
@@ -148,12 +179,6 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
               ),
             ),
           );
-        },
-      ),
-      drawer: AppDrawer(
-        getCurrentUser: () async {
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getString('username');
         },
       ),
     );
