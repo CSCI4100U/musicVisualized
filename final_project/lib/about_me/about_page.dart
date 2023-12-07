@@ -6,14 +6,12 @@ import '../recent_tracks.dart';
 import '../top_data/geo_top_tracks.dart';
 import '../top_data/top_scrobbles.dart';
 import '../top_data/top_visulized_data.dart';
-import '../utils/db_utils.dart';
 import 'about_me.dart';
 import 'data_entry_form.dart';
 
 class AboutMePage extends StatefulWidget {
   @override
   _AboutMePageState createState() => _AboutMePageState();
-
 }
 
 class _AboutMePageState extends State<AboutMePage> {
@@ -32,12 +30,6 @@ class _AboutMePageState extends State<AboutMePage> {
   void initState() {
     super.initState();
     _fetchUserData();
-    _fetchData();
-    fetchTopSongData();
-    fetchArtistSongData();
-    fetchTopAlbumData();
-    fetchLastTrackData();
-
   }
 
   Future<void> _fetchUserData() async {
@@ -50,8 +42,12 @@ class _AboutMePageState extends State<AboutMePage> {
           .then((QuerySnapshot snapshot) {
         if (snapshot.docs.isNotEmpty) {
           setState(() {
-            aboutData = AboutData.fromMap(
-                snapshot.docs.first.data() as Map<String, dynamic>);
+            aboutData = AboutData.fromMap(snapshot.docs.first.data() as Map<String, dynamic>);
+            _fetchData();
+            fetchTopSongData();
+            fetchArtistSongData();
+            fetchTopAlbumData();
+            fetchLastTrackData();
           });
         } else {
           setState(() {
@@ -60,23 +56,6 @@ class _AboutMePageState extends State<AboutMePage> {
         }
       });
     }
-  }
-
-
-  Future<void> _fetchData() async {
-    int scrobbles = await fetchTotalScrobbles(aboutData!.lastFMUsername);
-    setState(() {
-      totalScrobbles = scrobbles;
-    });
-  }
-
-  void fetchTopSongData() async {
-    final topData = await fetchTopSong(aboutData!.lastFMUsername);
-    setState(() {
-      print(topData['URL']);
-      topSong = (topData['topSong'] ?? '') + " - " + (topData['topArtist'] ?? '');
-      imgSong = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
-    });
   }
 
   void fetchLastTrackData() async {
@@ -98,7 +77,6 @@ class _AboutMePageState extends State<AboutMePage> {
   }
 
   void fetchTopAlbumData() async {
-    print(aboutData!.lastFMUsername);
     final topData = await fetchTopAlbum(aboutData!.lastFMUsername);
     setState(() {
       print(topData['URL']);
@@ -107,6 +85,24 @@ class _AboutMePageState extends State<AboutMePage> {
     });
   }
 
+  void _fetchData() async {
+    if (aboutData != null) {
+      int scrobbles = await fetchTotalScrobbles(aboutData!.lastFMUsername);
+      setState(() {
+        totalScrobbles = scrobbles;
+      });
+    }
+  }
+
+  void fetchTopSongData() async {
+    if (aboutData != null) {
+      final topData = await fetchTopSong(aboutData!.lastFMUsername);
+      setState(() {
+        topSong = (topData['topSong'] ?? '') + " - " + (topData['topArtist'] ?? '');
+        imgSong = topData['URL'] ?? 'https://lastfm.freetls.fastly.net/i/u/64s/4128a6eb29f94943c9d206c08e625904.jpg';
+      });
+    }
+  }
 
 
   void _promptForDataEntry() {
@@ -120,64 +116,22 @@ class _AboutMePageState extends State<AboutMePage> {
     return prefs.getString('username');
 
   }
-
-  Widget _buildDetailTile(String title, String detail, String imageUrl) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple.shade50,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 2,
-            blurRadius: 4,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          imageUrl.isNotEmpty
-              ? ClipRRect(
-            borderRadius: BorderRadius.circular(5),
-            child: Image.network(
-              imageUrl,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
-            ),
-          )
-              : Icon(Icons.person, color: Colors.deepPurple, size: 30),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.deepPurple,
-                  ),
+  void _showListBottomSheet(BuildContext context, List<String> list, String title) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    title: Text(title),
+                    onTap: () => Navigator.pop(context)
                 ),
-                SizedBox(height: 8),
-                Text(
-                  detail,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                for (var item in list) ListTile(title: Text(item)),
               ],
             ),
-          ),
-        ],
-      ),
+          );
+        }
     );
   }
 
@@ -186,7 +140,7 @@ class _AboutMePageState extends State<AboutMePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('About Me'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.black87,
         elevation: 0,
         actions: <Widget>[
           IconButton(
@@ -199,6 +153,7 @@ class _AboutMePageState extends State<AboutMePage> {
             },
           ),
         ],
+
       ),
       body: aboutData == null
           ? Center(child: CircularProgressIndicator())
@@ -215,7 +170,7 @@ class _AboutMePageState extends State<AboutMePage> {
         children: <Widget>[
           DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Colors.black87,
             ),
             child: FutureBuilder<String?>(
               future: getCurrentUser(),
@@ -223,7 +178,7 @@ class _AboutMePageState extends State<AboutMePage> {
                 if (snapshot.connectionState == ConnectionState.done) {
                   if (snapshot.hasData) {
                     return Text(
-                      snapshot.data!,
+                      "Welcome, " + snapshot.data!,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -315,17 +270,25 @@ class _AboutMePageState extends State<AboutMePage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                Text(
-                  aboutData!.name,
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple,
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: aboutData!.name,
+                        style: Theme.of(context).textTheme.headline6?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(
+                        text: " (@" + aboutData!.username + ")",
+                        style: Theme.of(context).textTheme.headline6?.copyWith(
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(height: 10),
                 Text(
-                  aboutData!.favoriteGenre,
+                  "Favorite Genre: " + aboutData!.favoriteGenre,
                   style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
                 SizedBox(height: 5),
@@ -334,40 +297,133 @@ class _AboutMePageState extends State<AboutMePage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildInfoCard('Followers: ${aboutData!.followers.length}'),
-                    _buildInfoCard('Following: ${aboutData!.following.length}'),
-
+                    _buildInfoCard('Followers: ${aboutData!.followers.length}', onTap: () {
+                      _showListBottomSheet(context, aboutData!.followers, "Followers");
+                    }),
+                    _buildInfoCard('Following: ${aboutData!.following.length}', onTap: () {
+                      _showListBottomSheet(context, aboutData!.following, "Following");
+                    }),
                   ],
                 ),
+                SizedBox(height: 10),
+                _buildInfoCard('Scrobbles: $totalScrobbles'),
+                if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
+                if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
+                if (topArtist.isNotEmpty) _buildDetailTile('Top Album', topAlbum, imgAlbum),
+                if (topArtist.isNotEmpty) _buildDetailTile('Recently Played', lastSong, imgLast),
               ],
             ),
           ),
-          if (topSong.isNotEmpty) _buildDetailTile('Top Song', topSong, imgSong),
-          if (topArtist.isNotEmpty) _buildDetailTile('Top Artist', topArtist, imgArtist),
-          if (topArtist.isNotEmpty) _buildDetailTile('Top Album', topAlbum, imgAlbum),
-          if (topArtist.isNotEmpty) _buildDetailTile('Recently Played', lastSong, imgLast),
         ],
       ),
     );
   }
 
-  Widget _buildInfoCard(String text) {
-    return Expanded(
+  Widget _buildDetailTile(String title, String detail, String imageUrl) {
+    return GestureDetector(
+        onTap: () {
+          if (title == "Top Song") {
+            print(aboutData!.lastFMUsername);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage(lastFmUsername: aboutData!.lastFMUsername, initialTabIndex: 0)),
+            );
+
+          } else if (title == "Top Artist") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage(lastFmUsername: aboutData!.lastFMUsername, initialTabIndex: 1)),
+            );
+          } else if (title == "Top Album") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => TopScrobblesPage(lastFmUsername: aboutData!.lastFMUsername, initialTabIndex: 2)),
+            );
+          } else if(title == "Recently Played") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RecentTracksPage(lastFmUsername: aboutData!.lastFMUsername)),
+            );
+          }
+        },
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade50,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 4,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              imageUrl.isNotEmpty
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.network(
+                  imageUrl,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Icon(Icons.error),
+                ),
+              )
+                  : Icon(Icons.person, color: Colors.deepPurple, size: 30),
+              SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.deepPurple,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      detail,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+  Widget _buildInfoCard(String text, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        margin: EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: Colors.deepPurple.shade50,
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           text,
-          style: TextStyle(fontSize: 18),
+          style: TextStyle(fontSize: 16),
           textAlign: TextAlign.center,
         ),
       ),
     );
   }
+
+
 
 
 
@@ -414,7 +470,7 @@ class ProfileSearchDelegate extends SearchDelegate {
           itemCount: docs.length,
           itemBuilder: (context, index) {
             var data = docs[index].data() as Map<String, dynamic>;
-            var profilePicUrl = data['profilePicUrl'] ?? 'https://lastfm.freetls.fastly.net/i/u/avatar170s/818148bf682d429dc215c1705eb27b98.png'; //TO:DO default profile pic
+            var profilePicUrl = data['profilePicUrl'] ?? 'https://lastfm.freetls.fastly.net/i/u/avatar170s/818148bf682d429dc215c1705eb27b98.png';
 
             return ListTile(
               leading: CircleAvatar(
@@ -459,4 +515,3 @@ class _TopGradientSection extends StatelessWidget {
     );
   }
 }
-

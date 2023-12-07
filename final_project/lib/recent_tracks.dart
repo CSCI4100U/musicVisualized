@@ -99,7 +99,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
       print("Last Fm user is: $lastFmUsername");
       print("Getting link");
       final response = await http.get(
-        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=8144424eb171da76b52e51f1f748995a&format=json&limit=10'),
+        Uri.parse('https://ws.audioscrobbler.com/2.0/?method=user.getRecentTracks&user=$lastFmUsername&api_key=8144424eb171da76b52e51f1f748995a&format=json&limit=100'),
       );
       print(response.body);
 
@@ -138,6 +138,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
       return Scaffold(
         appBar: AppBar(
           title: Text('Loading...'),
+          backgroundColor: Colors.black87,
         ),
         body: Center(
           child: CircularProgressIndicator(),
@@ -147,6 +148,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
       return Scaffold(
         appBar: AppBar(
           title: Text('Error'),
+          backgroundColor: Colors.black87,
         ),
         body: Center(
           child: Text(_error!),
@@ -157,7 +159,9 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Recent Tracks'),
+
         // automaticallyImplyLeading: false,
+        backgroundColor: Colors.black87,
       ),
       body: ListView.builder(
         itemCount: _tracks.length,
@@ -171,7 +175,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.black87,
               ),
               child: FutureBuilder<String?>(
                 future: getCurrentUser(),
@@ -179,7 +183,7 @@ class _RecentTracksPageState extends State<RecentTracksPage> {
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasData) {
                       return Text(
-                        snapshot.data!,
+                        "Welcome, " + snapshot.data!,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,

@@ -94,6 +94,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
+        backgroundColor: Colors.black87,
       ),
       drawer: Drawer(
         child: ListView(
@@ -101,7 +102,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.black87,
               ),
               child: FutureBuilder<String?>(
                 future: getCurrentUser(),
@@ -110,7 +111,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasData) {
                       return Text(
-                        snapshot.data!,
+                        "Welcome, " + snapshot.data!,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,

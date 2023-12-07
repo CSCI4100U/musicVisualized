@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Modern Landing Page',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        backgroundColor: Colors.black87,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(),

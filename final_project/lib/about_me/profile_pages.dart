@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project/recent_tracks.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'about_me.dart';
 import '../top_data/top_scrobbles.dart';
@@ -208,6 +207,24 @@ class _UserProfilePageState extends State<UserProfilePage> {
       );
     });
   }
+  void _showListBottomSheet(BuildContext context, List<String> list, String title) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Container(
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                    title: Text(title),
+                    onTap: () => Navigator.pop(context) // Closes the bottom sheet
+                ),
+                for (var item in list) ListTile(title: Text(item)),
+              ],
+            ),
+          );
+        }
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -251,8 +268,13 @@ class _UserProfilePageState extends State<UserProfilePage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildInfoCard('Followers: ${widget.userData.followers.length}'),
-                      _buildInfoCard('Following: ${widget.userData.following.length}'),
+                      _buildInfoCard('Followers: ${widget.userData.followers.length}', onTap: () {
+                        _showListBottomSheet(context, widget.userData.followers, "Followers");
+                      }),
+                      _buildInfoCard('Following: ${widget.userData.following.length}', onTap: () {
+                        _showListBottomSheet(context, widget.userData.following, "Following");
+                      }),
+
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -401,19 +423,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
 
-  Widget _buildInfoCard(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.deepPurple.shade50,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 16),
+  Widget _buildInfoCard(String text, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap, // Only triggers if onTap is not null
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        margin: EdgeInsets.only(bottom: 10), // Adjust this value as needed
+        decoration: BoxDecoration(
+          color: Colors.deepPurple.shade50,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
+
 }
 
 class _TopGradientSection extends StatelessWidget {

@@ -30,31 +30,50 @@ class TrackListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scrobbledTime = _formatScrobbledTime(track['date']);
-    print( track);
+
     return Card(
-      elevation: 2,
-      margin: EdgeInsets.all(8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.0), // Rounded corners for the card
+      ),
+      elevation: 5, // Match elevation with your other cards
+      margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       child: ListTile(
-        leading: Image.network(
-          track['image'][1]['#text'].isEmpty ? 'http://mcgodftw.dev/i/r2kyqb6k.png' : track['image'][1]['#text'],
-          width: 50,
-          height: 50,
-          errorBuilder: (context, error, stackTrace) {
-            return Image.network('http://mcgodftw.dev/i/r2kyqb6k.png');
-          },
+        contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8.0), // Rounded corners for the image
+          child: Image.network(
+            track['image'][1]['#text'].isEmpty ? 'http://mcgodftw.dev/i/r2kyqb6k.png' : track['image'][1]['#text'],
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover, // Ensures the image covers the area properly
+            errorBuilder: (context, error, stackTrace) => Icon(Icons.broken_image),
+          ),
         ),
         title: Text(
           track['name'],
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87, // Optional: Adjust the text color if needed
+          ),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(track['artist']['#text']),
-            Text(scrobbledTime),
+            Text(
+              track['artist']['#text'],
+              style: TextStyle(
+                color: Colors.black54, // Optional: Adjust the text color if needed
+              ),
+            ),
+            Text(
+              scrobbledTime,
+              style: TextStyle(
+                color: Colors.black54, // Optional: Adjust the text color if needed
+              ),
+            ),
           ],
         ),
-        trailing: Icon(Icons.more_vert),
+        trailing: Icon(Icons.more_vert, color: Colors.black54), // Adjust icon color if needed
       ),
     );
   }

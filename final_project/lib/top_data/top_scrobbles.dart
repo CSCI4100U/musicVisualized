@@ -35,26 +35,26 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
   }
   void _showScrobbleDialog() {
     if (!_isDialogShown) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Welcome"),
-          content: Text("This is the Scrobble Data Page."),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showScrobble2Dialog();
-              },
-            ),
-          ],
-        );
-      },
-    );
-    _isDialogShown = true;
-  }
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Welcome"),
+            content: Text("This is the Scrobble Data Page."),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _showScrobble2Dialog();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      _isDialogShown = true;
+    }
   }
   void _showScrobble2Dialog() {
     showDialog(
@@ -98,7 +98,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 
       final response = await http.get(
         Uri.parse(
-            'https://ws.audioscrobbler.com/2.0/?method=user.getTopArtists&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'
+            'https://ws.audioscrobbler.com/2.0/?method=user.getTopArtists&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=25'
         ),
       );
 
@@ -128,7 +128,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 
       final response = await http.get(
         Uri.parse(
-            'https://ws.audioscrobbler.com/2.0/?method=user.getTopAlbums&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'
+            'https://ws.audioscrobbler.com/2.0/?method=user.getTopAlbums&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=25'
         ),
       );
 
@@ -157,7 +157,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
 
       final response = await http.get(
         Uri.parse(
-            'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=10'
+            'https://ws.audioscrobbler.com/2.0/?method=user.getTopTracks&user=$lastFmUsername&api_key=$_apiKey&format=json&limit=25'
         ),
       );
 
@@ -219,7 +219,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
           children: <Widget>[
             DrawerHeader(
               decoration: BoxDecoration(
-                color: Colors.blue,
+                color: Colors.black87,
               ),
               child: FutureBuilder<String?>(
                 future: getCurrentUser(),
@@ -227,7 +227,7 @@ class _TopScrobblesPageState extends State<TopScrobblesPage> with SingleTickerPr
                   if (snapshot.connectionState == ConnectionState.done) {
                     if (snapshot.hasData) {
                       return Text(
-                        snapshot.data!,
+                        "Welcome, " + snapshot.data!,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 24,

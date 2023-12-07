@@ -109,6 +109,7 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
             },
           ),
         ],
+        backgroundColor: Colors.black87,
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
