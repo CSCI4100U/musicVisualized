@@ -5,7 +5,9 @@ import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../utils/app_drawer.dart';
 import '../utils/fetch_image.dart';
 
 const Color silverColor = Color(0xFFC0C0C0);
@@ -222,6 +224,12 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
               }
             },
           );
+        },
+      ),
+      drawer: AppDrawer(
+        getCurrentUser: () async {
+          final prefs = await SharedPreferences.getInstance();
+          return prefs.getString('username');
         },
       ),
     );
