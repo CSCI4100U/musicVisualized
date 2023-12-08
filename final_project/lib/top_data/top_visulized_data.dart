@@ -308,29 +308,44 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Track Details"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Track Name: ${track['name']}"),
-              Text("Track Artist: ${track['artist']['name']}"),
-              Text("Scrobbles: ${track['playcount']}"),
-            ],
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: Text("OK"),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+          child: Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  "Name: ${track['name']}",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  "Artist: ${track['artist']['name']}",
+                  style: TextStyle(fontSize: 14),
+                ),
+                Text(
+                  "Scrobbles: ${track['playcount']}",
+                  style: TextStyle(fontSize: 14),
+                ),
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("OK"),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
   }
+
 
   Widget _buildPieChart() {
     return GestureDetector(
@@ -381,20 +396,23 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
               padding: EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [// Image at the top
+                children: [
                   SizedBox(height: 16),
-                  // Song details in the center
+
                   Text(
                     "Name: ${track['name']}",
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                   SizedBox(height: 8),
                   Text(
+                    "Artist: ${track['artist']['name']}",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  Text(
                     "Play Count: ${track['playcount']}",
                     style: TextStyle(fontSize: 14),
                   ),
                   SizedBox(height: 16),
-                  // OK button at the bottom
                   ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
