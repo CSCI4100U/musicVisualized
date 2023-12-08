@@ -1,4 +1,3 @@
-import 'package:final_project/about_me/profile_pages.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -7,12 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../about_me/about_page.dart';
-import '../utils/app_drawer.dart';
 import '../utils/db_utils.dart';
 import 'top_scrobbles.dart';
 import '../recent_tracks.dart';
 import 'geo_top_tracks.dart';
-import '../utils/fetch_image.dart';
 
 class VisualizedDataPage extends StatefulWidget {
   @override
@@ -21,10 +18,8 @@ class VisualizedDataPage extends StatefulWidget {
 
 class _VisualizedDataPageState extends State<VisualizedDataPage> {
   List<dynamic> _topTracks = [];
-  List<dynamic> _topArtists = [];
   bool _isDialogShown = false;
   ChartType _selectedChartType = ChartType.Bar;
-
 
   @override
   void initState() {
@@ -86,100 +81,120 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     );
 
     if (response.statusCode == 200) {
-      var decodedBody = utf8.decode(response.bodyBytes);
-      final data = json.decode(decodedBody);
+      final data = json.decode(response.body);
       setState(() {
         _topTracks = data['toptracks']['track'];
-        _topArtists = data['topartists']['artist'];
         _showVisualiseDialog();
-
       });
     }
   }
 
-  List<PieChartSectionData> _getSections() {
-    double totalPlayCount = _topTracks.fold(0.0, (sum, track) {
-      return sum + (double.tryParse(track['playcount'] ?? '0') ?? 0);
-    });
-
-    return _topTracks
-        .asMap()
-        .entries
-        .map((entry) {
-      final int index = entry.key;
-      final dynamic track = entry.value;
-
-      double value = (double.tryParse(track['playcount'] ?? '0') ?? 0);
-      double percent = (value / totalPlayCount) * 100;
-
-      return PieChartSectionData(
-        color: _getColor(index),
-        value: percent,
-        title: '${percent.toStringAsFixed(2)}%',
-        radius: 60,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-        showTitle: true,
-      );
-    })
-        .toList();
-  }
-
-
-  Future<String> getSongWithMostScrobbles() async {
-    if (_topTracks.isEmpty) {
-      return 'No songs available';
-    }
-
-    // Sort the tracks in descending order based on playcount
-    _topTracks.sort((a, b) {
-      double playcountA = double.tryParse(a['playcount'] ?? '0') ?? 0;
-      double playcountB = double.tryParse(b['playcount'] ?? '0') ?? 0;
-      return playcountB.compareTo(playcountA);
-    });
-
-    // Get the first track (the one with the most scrobbles)
-    Map<String, dynamic> mostScrobbledTrack = _topTracks.first;
-
-    // Extract the name of the most scrobbled track
-    String mostScrobbledTrackName = mostScrobbledTrack['name'].toString();
-
-    return mostScrobbledTrackName;
-  }
-  String getArtistNameForTrack(String targetSongName) {
-    String artistName = 'Unknown Artist';
-
-    for (Map<String, dynamic> track in _topTracks) {
-      if (track['name'] == targetSongName) {
-        artistName = track['artist']['name'] ?? 'Unknown Artist';
-        break;
-      }
-    }
-
-    return artistName;
-  }
-
-
-
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       appBar: AppBar(
         title: Text('Visualized Data'),
         backgroundColor: Colors.black87,
       ),
-      drawer: AppDrawer(
-        getCurrentUser: () async {
-          final prefs = await SharedPreferences.getInstance();
-          return prefs.getString('username');
-        },
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.black87,
+              ),
+              child: FutureBuilder<String?>(
+                future: getCurrentUser(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<String?> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData) {
+                      return Text(
+                        "Welcome, " + snapshot.data!,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    } else {
+                      return Text(
+                        'Guest',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      );
+                    }
+                  } else {
+                    return CircularProgressIndicator();
+                  }
+                },
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.music_note),
+              title: Text('Top Scrobbles'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TopScrobblesPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.history),
+              title: Text('Recent Tracks'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => RecentTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.language),
+              title: Text('Top Tracks by Country'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => MostStreamedTracksPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.bar_chart),
+              title: Text('Data Visualized'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => VisualizedDataPage()),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.people),
+              title: Text('Profiles'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutMePage()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            SizedBox(height: 5),
             DropdownButton<ChartType>(
               value: _selectedChartType,
               items: [
@@ -199,7 +214,10 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
               },
             ),
             Container(
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width,
               height: 600,
               child: _selectedChartType == ChartType.Bar
                   ? _buildBarChart()
@@ -212,14 +230,11 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
   }
 
   Widget _buildBarChart() {
-    // Sort _topTracks in ascending order based on 'playcount'
     _topTracks.sort((a, b) {
       double playcountA = double.tryParse(a['playcount'] ?? '0') ?? 0;
       double playcountB = double.tryParse(b['playcount'] ?? '0') ?? 0;
       return playcountA.compareTo(playcountB);
     });
-
-    String artistName;
     return SfCartesianChart(
       primaryXAxis: CategoryAxis(
         labelStyle: TextStyle(
@@ -244,100 +259,136 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
             ),
           ),
           enableTooltip: true,
+          onPointTap: (ChartPointDetails details) {
+            if(details.pointIndex != null) {
+              _showTrackDetails(details.pointIndex!);
+            }
+          },
         ),
       ],
       tooltipBehavior: TooltipBehavior(
         enable: true,
         header: '',
         canShowMarker: false,
-        format: 'Name: point.x\nArtist: \nPlaycount: point.y',
+        format: 'point.y',
       ),
     );
   }
 
-  Widget _buildPieChart() {
-    return GestureDetector(
-      onTap: () {
-        if (_topTracks.isNotEmpty) {
-          _showSongDetails(_topTracks[0]);
-        }
-      },
-      child: PieChart(
-        PieChartData(
-          sections: _getSections(),
-          pieTouchData: PieTouchData(
-            touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
-              if (event is FlLongPressEnd) {
-                if (touchResponse != null &&
-                    touchResponse.touchedSection != null) {
-                  _showSongDetails(
-                    _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
-                  );
-                }
-              }
-            },
+  void _showTrackDetails(int index) {
+    if (index < 0 || index >= _topTracks.length) return;
+    var track = _topTracks[index];
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Track Details"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Track Name: ${track['name']}"),
+              Text("Track Artist: ${track['artist']['name']}"),
+              Text("Scrobbles: ${track['playcount']}"),
+            ],
           ),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+  Widget _buildPieChart() {
+    return PieChart(
+      PieChartData(
+        sections: _getSections(),
+        pieTouchData: PieTouchData(
+          touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
+            if (event is FlLongPressEnd) {
+              if (touchResponse != null &&
+                  touchResponse.touchedSection != null) {
+                _showSongDetails(
+                  _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
+                );
+              }
+            }
+          },
         ),
       ),
     );
-
   }
 
 
+
+
+  List<PieChartSectionData> _getSections() {
+    double totalPlayCount = _topTracks.fold(0.0, (sum, track) {
+      return sum + (double.tryParse(track['playcount'] ?? '0') ?? 0);
+    });
+
+    return _topTracks
+        .asMap()
+        .entries
+        .map((entry) {
+      final int index = entry.key;
+      final dynamic track = entry.value;
+
+      double value = (double.tryParse(track['playcount'] ?? '0') ?? 0);
+      double percent = (value / totalPlayCount) * 100;
+
+      return PieChartSectionData(
+        color: _getColor(index),
+        value: percent,
+        title: '${percent.toStringAsFixed(2)}%',
+        radius: 60,
+        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+      );
+    }).toList();
+  }
 
   Color _getColor(int index) {
     return Colors.accents[index % Colors.accents.length];
   }
 
-  void _showSongDetails(dynamic track) async {
+  void _showSongDetails(dynamic track) {
     if (track != null && _topTracks.contains(track)) {
-        print('Showing song details for ${track['name']}');
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            print('Building dialog for ${track['name']}');
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Song Details"),
+            content: Column(
+              children: [
+                Text("Name: ${track['name']}"),
+              ],
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [// Image at the top
-                    SizedBox(height: 16),
-                    // Song details in the center
-                    Text(
-                      "Name: ${track['name']}",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      "Play Count: ${track['playcount']}",
-                      style: TextStyle(fontSize: 14),
-                    ),
-                    SizedBox(height: 16),
-                    // OK button at the bottom
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text("OK"),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      } else {
-        print('Invalid track or track not in _topTracks');
-      }
+            ],
+          );
+        },
+      );
     }
+  }
 }
 
 
-  enum ChartType {
+enum ChartType {
   Bar,
   Pie,
 }
