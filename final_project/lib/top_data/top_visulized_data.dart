@@ -359,7 +359,7 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
           sections: _getSections(),
           pieTouchData: PieTouchData(
             touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
-              if (event is FlLongPressEnd) {
+              if (event is FlTapUpEvent) {
                 if (touchResponse != null &&
                     touchResponse.touchedSection != null) {
                   _showSongDetails(
