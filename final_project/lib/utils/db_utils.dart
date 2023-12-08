@@ -60,12 +60,13 @@ class DatabaseHelper {
   }
   // Verify the user's credentials
   Future<bool> verifyUser(String username, String password) async {
+    String uname = username.toLowerCase();
     final db = await instance.database;
     final result = await db.query(
       'users',
       columns: ['username', 'password'],
       where: 'username = ?',
-      whereArgs: [username],
+      whereArgs: [uname],
     );
 
     if (result.isNotEmpty) {
