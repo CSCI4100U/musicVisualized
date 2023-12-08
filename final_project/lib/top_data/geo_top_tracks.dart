@@ -215,11 +215,8 @@ class _MostStreamedTracksPageState extends State<MostStreamedTracksPage> {
                       ),
                     ),
                     subtitle: Text(
-                        'Artist: ${track['artist']['name']}\nPlay count: ${track['playcount']}'),
-                    trailing: IconButton(
-                      icon: Icon(Icons.more_vert),
-                      onPressed: () {},
-                    ),
+                        'Artist: ${track['artist']['name']}}'),
+
                   ),
                 );
               }
