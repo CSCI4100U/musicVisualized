@@ -88,6 +88,32 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
       });
     }
   }
+  List<PieChartSectionData> _getSections() {
+    double totalPlayCount = _topTracks.fold(0.0, (sum, track) {
+      return sum + (double.tryParse(track['playcount'] ?? '0') ?? 0);
+    });
+
+    return _topTracks
+        .asMap()
+        .entries
+        .map((entry) {
+      final int index = entry.key;
+      final dynamic track = entry.value;
+
+      double value = (double.tryParse(track['playcount'] ?? '0') ?? 0);
+      double percent = (value / totalPlayCount) * 100;
+
+      return PieChartSectionData(
+        color: _getColor(index),
+        value: percent,
+        title: '${percent.toStringAsFixed(2)}%',
+        radius: 60,
+        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+        showTitle: true,
+      );
+    })
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -306,87 +332,86 @@ class _VisualizedDataPageState extends State<VisualizedDataPage> {
     );
   }
 
-
-
   Widget _buildPieChart() {
-    return PieChart(
-      PieChartData(
-        sections: _getSections(),
-        pieTouchData: PieTouchData(
-          touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
-            if (event is FlLongPressEnd) {
-              if (touchResponse != null &&
-                  touchResponse.touchedSection != null) {
-                _showSongDetails(
-                  _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
-                );
+    return GestureDetector(
+      onTap: () {
+        if (_topTracks.isNotEmpty) {
+          _showSongDetails(_topTracks[0]);
+        }
+      },
+      child: PieChart(
+        PieChartData(
+          sections: _getSections(),
+          pieTouchData: PieTouchData(
+            touchCallback: (FlTouchEvent event, PieTouchResponse? touchResponse) {
+              if (event is FlLongPressEnd) {
+                if (touchResponse != null &&
+                    touchResponse.touchedSection != null) {
+                  _showSongDetails(
+                    _topTracks[touchResponse.touchedSection!.touchedSectionIndex],
+                  );
+                }
               }
-            }
-          },
+            },
+          ),
         ),
       ),
     );
+
   }
 
 
-
-
-  List<PieChartSectionData> _getSections() {
-    double totalPlayCount = _topTracks.fold(0.0, (sum, track) {
-      return sum + (double.tryParse(track['playcount'] ?? '0') ?? 0);
-    });
-
-    return _topTracks
-        .asMap()
-        .entries
-        .map((entry) {
-      final int index = entry.key;
-      final dynamic track = entry.value;
-
-      double value = (double.tryParse(track['playcount'] ?? '0') ?? 0);
-      double percent = (value / totalPlayCount) * 100;
-
-      return PieChartSectionData(
-        color: _getColor(index),
-        value: percent,
-        title: '${percent.toStringAsFixed(2)}%',
-        radius: 60,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      );
-    }).toList();
-  }
 
   Color _getColor(int index) {
     return Colors.accents[index % Colors.accents.length];
   }
 
-  void _showSongDetails(dynamic track) {
+  void _showSongDetails(dynamic track) async {
     if (track != null && _topTracks.contains(track)) {
+      print('Showing song details for ${track['name']}');
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Song Details"),
-            content: Column(
-              children: [
-                Text("Name: ${track['name']}"),
-              ],
+          print('Building dialog for ${track['name']}');
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            actions: <Widget>[
-              TextButton(
-                child: Text("OK"),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [// Image at the top
+                  SizedBox(height: 16),
+                  // Song details in the center
+                  Text(
+                    "Name: ${track['name']}",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Play Count: ${track['playcount']}",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  SizedBox(height: 16),
+                  // OK button at the bottom
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("OK"),
+                  ),
+                ],
               ),
-            ],
+            ),
           );
         },
       );
+    } else {
+      print('Invalid track or track not in _topTracks');
     }
   }
 }
-
 
 enum ChartType {
   Bar,
