@@ -185,8 +185,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       return;
     }
 
-    final currentUserDoc = await _getDocumentReferenceByUsername(currentUsername);
-    final unfollowedUserDoc = await _getDocumentReferenceByUsername(unfollowedUsername);
+    final currentUserDoc = await _getDocumentReferenceByUsername(currentUsername.toLowerCase());
+    final unfollowedUserDoc = await _getDocumentReferenceByUsername(unfollowedUsername.toLowerCase());
 
     if (currentUserDoc == null || unfollowedUserDoc == null) {
       ScaffoldMessenger.of(context).showSnackBar(
