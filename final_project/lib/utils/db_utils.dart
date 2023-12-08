@@ -65,7 +65,7 @@ class DatabaseHelper {
     final result = await db.query(
       'users',
       columns: ['username', 'password'],
-      where: 'username = ?',
+      where: 'LOWER(username) = ?',
       whereArgs: [uname],
     );
 

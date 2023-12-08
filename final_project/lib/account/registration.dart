@@ -93,7 +93,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       }
 
       User newUser = User(
-        username: username.toLowerCase(),
+        username: username,
         email: emailController.text,
         password: passwordController.text,
         firstName: firstNameController.text,
