@@ -123,8 +123,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
       return;
     }
 
-    final currentUserDoc = await _getDocumentReferenceByUsername(currentUsername);
-    final followedUserDoc = await _getDocumentReferenceByUsername(followedUsername);
+    final currentUserDoc = await _getDocumentReferenceByUsername(currentUsername.toLowerCase());
+    final followedUserDoc = await _getDocumentReferenceByUsername(followedUsername.toLowerCase());
 
     if (currentUserDoc == null || followedUserDoc == null) {
       ScaffoldMessenger.of(context).showSnackBar(

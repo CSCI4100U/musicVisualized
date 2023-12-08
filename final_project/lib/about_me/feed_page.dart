@@ -50,7 +50,7 @@ class _FeedPageState extends State<FeedPage> {
     try {
       final querySnapshot = await FirebaseFirestore.instance
           .collection('aboutme')
-          .where('username', isEqualTo: currentUsername)
+          .where('username', isEqualTo: currentUsername?.toLowerCase())
           .limit(1)
           .get();
 
