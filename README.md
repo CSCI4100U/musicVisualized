@@ -2,7 +2,7 @@
 
 ## 🚀 Project Overview
 
-Welcome to the vibrant world of Music Visualization with our MusicVisualized Project! Leveraging the powerful APIs of LastFM and Spotify, this application is at the forefront of music data management and analysis. It's not just about listening to music; it's about understanding and visualizing your musical journey in an unprecedented way.
+Welcome to the vibrant world of Music Visualization with our MusicVisualized Project! Leveraging the powerful APIs of LastFM and Spotify. It's not just about listening to music; it's about understanding the numbers and visualizing your musical journey.
 
 ### ✨ Exciting Features
 
